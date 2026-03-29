@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MJL foods</title>
+</head>
+<body>
+
+<h1>Products </h1>
+
+<button onclick="loadProducts()">Load products</button>
+
+<ul id="products"></ul>
+
+<script>
+async function loadProducts() {
+    const res = await fetch("http://127.0.0.1:8000/products");
+    const data = await res.json();
+
+    const list = document.getElementById("products");
+    list.innerHTML = "";
+
+    data.forEach(p => {
+        const li = document.createElement("li");
+        li.innerText = p.name + " - " + p.price + " zł";
+        list.appendChild(li);
+    });
+}
+</script>
+
+</body>
+</html>
