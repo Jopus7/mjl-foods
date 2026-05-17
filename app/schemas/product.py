@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProductCreate(BaseModel):
@@ -16,10 +16,16 @@ class ProductResponse(BaseModel):
     name: str
     description: str
     price: float
-    image_url: str
+
+    image_url: str = Field(alias="imageUrl")
+
     available: bool
-    is_popular: bool
+
+    is_popular: bool = Field(alias="isPopular")
+
     category: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True
+    )

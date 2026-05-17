@@ -7,7 +7,7 @@ from app.schemas.product import ProductCreate, ProductResponse
 
 router = APIRouter()
 
-@router.get("/products", response_model=list[ProductResponse])
+@router.get("/api/products", response_model=list[ProductResponse])
 def get_products(db: Session = Depends(get_db)):
     return db.query(Product).all()
 
@@ -31,7 +31,21 @@ def get_menu(db: Session = Depends(get_db)):
         .all(),
     }
 
-@router.post("/products", response_model=ProductResponse)
+@router.get(
+    "/api/popular",
+    response_model=list[ProductResponse]
+)
+def get_popular_products(
+    db: Session = Depends(get_db)
+):
+    return (
+        db.query(Product)
+        .filter(Product.is_popular == True)
+        .limit(4)
+        .all()
+    )
+
+@router.post("/api/products", response_model=ProductResponse)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     new_product = Product(
     name=product.name,
@@ -50,7 +64,7 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
 
     return new_product
 
-@router.put("/products/{product_id}", response_model=ProductResponse)
+@router.put("/api/products/{product_id}", response_model=ProductResponse)
 def update_product(
     product_id: int,
     product: ProductCreate,
@@ -82,7 +96,7 @@ def update_product(
     return db_product
 
 @router.delete(
-    "/products/{product_id}",
+    "/api/products/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
 def delete_product(product_id: int, db: Session = Depends(get_db)):
