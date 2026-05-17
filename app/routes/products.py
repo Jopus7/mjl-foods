@@ -14,9 +14,15 @@ def get_products(db: Session = Depends(get_db)):
 @router.post("/products", response_model=ProductResponse)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     new_product = Product(
-        name=product.name,
-        price=product.price
+    name=product.name,
+    description=product.description,
+    price=product.price,
+    image_url=product.image_url,
+    available=product.available,
+    is_popular=product.is_popular,
+    category=product.category
     )
+
 
     db.add(new_product)
     db.commit()
@@ -25,14 +31,30 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     return new_product
 
 @router.put("/products/{product_id}", response_model=ProductResponse)
-def update_product(product_id: int, product: ProductCreate, db: Session = Depends(get_db)):
-    db_product = db.query(Product).filter(Product.id == product_id).first()
+def update_product(
+    product_id: int,
+    product: ProductCreate,
+    db: Session = Depends(get_db)
+):
+    db_product = (
+        db.query(Product)
+        .filter(Product.id == product_id)
+        .first()
+    )
 
     if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
 
     db_product.name = product.name
+    db_product.description = product.description
     db_product.price = product.price
+    db_product.image_url = product.image_url
+    db_product.available = product.available
+    db_product.is_popular = product.is_popular
+    db_product.category = product.category
 
     db.commit()
     db.refresh(db_product)
