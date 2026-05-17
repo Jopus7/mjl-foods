@@ -11,6 +11,26 @@ router = APIRouter()
 def get_products(db: Session = Depends(get_db)):
     return db.query(Product).all()
 
+@router.get("/api/menu")
+def get_menu(db: Session = Depends(get_db)):
+    return {
+        "zupy": db.query(Product)
+        .filter(Product.category == "zupy")
+        .all(),
+
+        "daniaGlowne": db.query(Product)
+        .filter(Product.category == "daniaGlowne")
+        .all(),
+
+        "desery": db.query(Product)
+        .filter(Product.category == "desery")
+        .all(),
+
+        "napoje": db.query(Product)
+        .filter(Product.category == "napoje")
+        .all(),
+    }
+
 @router.post("/products", response_model=ProductResponse)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     new_product = Product(
