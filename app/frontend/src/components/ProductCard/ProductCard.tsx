@@ -3,6 +3,7 @@ import { Product } from '../../types';
 import styles from './ProductCard.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faUtensils } from '@fortawesome/free-solid-svg-icons';
+import { useCart } from '../../context/CartContext';
 
 interface Props {
   item: Product;
@@ -10,6 +11,7 @@ interface Props {
 
 const ProductCard = ({ item }: Props) => {
   const [imgError, setImgError] = useState(false);
+  const { addToCart } = useCart();
 
   return (
     <div className={styles.card}>
@@ -41,6 +43,7 @@ const ProductCard = ({ item }: Props) => {
           <button
             className={styles.addButton}
             aria-label={`Dodaj ${item.name} do koszyka`}
+            onClick={() => addToCart(item)}
           >
             <span className={styles.plus}>
               <FontAwesomeIcon icon={faPlus} />

@@ -36,7 +36,6 @@
   transform: scale(1.06);
 }
 
-/* warm overlay at the bottom of the image — gives the card depth */
 .imageWrap::after {
   content: '';
   position: absolute;
@@ -87,6 +86,7 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
+
 .currency {
   font-family: var(--font-body);
   font-size: 0.85rem;
@@ -109,10 +109,12 @@
     background 180ms ease,
     transform 180ms ease;
 }
+
 .addButton:hover {
   background: var(--orange);
   transform: translateY(-1px);
 }
+
 .plus {
   display: inline-flex;
   align-items: center;

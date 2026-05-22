@@ -1,0 +1,126 @@
+.checkout-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 64px 28px 96px;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  padding: 6px 14px;
+  background: var(--green-soft);
+  color: var(--green-deep);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--radius-pill);
+  margin-bottom: 20px;
+}
+
+.checkout-container h2 {
+  font-style: italic;
+  margin-bottom: 28px;
+}
+
+.method-selector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.method-selector button {
+  flex: 1;
+  padding: 14px;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  color: var(--ink-mute);
+  transition: all 180ms ease;
+}
+
+.method-selector button.active {
+  border-color: var(--orange);
+  background: var(--orange-soft);
+  color: var(--orange-deep);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.checkout-container input {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.checkout-container input:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 4px var(--orange-soft);
+}
+
+.checkout-container input::placeholder {
+  color: var(--ink-mute);
+}
+
+.input-error {
+  border-color: #dc2626 !important;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 6px;
+  margin-left: 4px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 1rem;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.submit-btn:hover {
+  background: var(--orange);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .checkout-container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
