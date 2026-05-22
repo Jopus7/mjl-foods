@@ -7,33 +7,36 @@ import About from './pages/About/About';
 import Cart from './pages/Cart/Cart';
 import Checkout from './pages/Checkout/Checkout';
 import OrderStatus from './pages/OrderStatus/OrderStatus';
+import { CartProvider } from './context/CartContext';
 import './index.css';
 
 function App() {
   return (
-    <Router>
-      <Navbar />
+    <CartProvider>
+      <Router>
+        <Navbar />
 
-      <main className="content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<Menu />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/status" element={<OrderStatus />} />
+        <main className="content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/menu" element={<Menu />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/status" element={<OrderStatus />} />
 
-          <Route
-            path="*"
-            element={
-              <div className="not-found">404 — Nie znaleziono strony</div>
-            }
-          />
-        </Routes>
-      </main>
+            <Route
+              path="*"
+              element={
+                <div className="not-found">404 — Nie znaleziono strony</div>
+              }
+            />
+          </Routes>
+        </main>
 
-      <Footer />
-    </Router>
+        <Footer />
+      </Router>
+    </CartProvider>
   );
 }
 

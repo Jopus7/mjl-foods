@@ -1,20 +1,18 @@
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './Cart.module.css';
+import { useCart } from '../../context/CartContext';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
-  const total = cartItems.reduce(
-    (acc: number, item: any) => acc + item.price,
-    0
-  );
+  const { cart, removeFromCart } = useCart();
+  const total = cart.reduce((acc, item) => acc + item.price, 0);
 
   return (
     <div className={styles['cart-container']}>
       <h1>Twój koszyk</h1>
 
       <div className={styles['cart-list']}>
-        {cartItems.length === 0 ? (
+        {cart.length === 0 ? (
           <div className={styles['cart-empty']}>
             <span className={styles.emoji} aria-hidden="true">
               🍽️
@@ -29,16 +27,24 @@ const Cart = () => {
             </Link>
           </div>
         ) : (
-          cartItems.map((item: any, index: number) => (
-            <div key={index} className={styles['cart-row']}>
+          cart.map((item) => (
+            <div key={item.cartItemId} className={styles['cart-row']}>
               <span>{item.name}</span>
-              <span>{item.price} zł</span>
+              <div>
+                <span style={{ marginRight: '16px' }}>{item.price} zł</span>
+                <button
+                  onClick={() => removeFromCart(item.cartItemId)}
+                  style={{ color: 'red', fontWeight: 'bold' }}
+                >
+                  X
+                </button>
+              </div>
             </div>
           ))
         )}
       </div>
 
-      {cartItems.length > 0 && (
+      {cart.length > 0 && (
         <div className={styles.summary}>
           <h3>
             Suma: <em>{total} zł</em>

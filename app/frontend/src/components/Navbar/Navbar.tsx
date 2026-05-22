@@ -3,8 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCartShopping } from '@fortawesome/free-solid-svg-icons';
 import logo2 from '../../assets/logo2.png';
 import styles from './Navbar.module.css';
+import { useCart } from '../../context/CartContext';
 
 const Navbar = () => {
+  const { cart } = useCart();
+
   return (
     <nav className={styles.navbar}>
       <div className={styles['navbar-container']}>
@@ -44,7 +47,7 @@ const Navbar = () => {
               <FontAwesomeIcon icon={faCartShopping} />
             </span>
             <span>Koszyk</span>
-            <span className={styles['cart-count']}>0</span>
+            <span className={styles['cart-count']}>{cart.length}</span>
           </Link>
         </div>
       </div>

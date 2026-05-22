@@ -56,13 +56,14 @@
 }
 .summary h3 {
   color: var(--cream);
-  margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
 }
 .summary h3 em {
   color: var(--orange);
   font-style: normal;
+  display: inline-block;
+  margin-left: 5px;
 }
 .summary button {
   padding: 14px 24px;
