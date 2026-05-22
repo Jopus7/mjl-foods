@@ -1,0 +1,29 @@
+.menuContainer {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.categorySection {
+  margin-bottom: 50px;
+}
+
+.categoryTitle {
+  font-size: 2rem;
+  color: #1a1a1a;
+  border-bottom: 3px solid #ff4d4d;
+  display: inline-block;
+  margin-bottom: 25px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.5rem;
+  padding: 100px;
+}
