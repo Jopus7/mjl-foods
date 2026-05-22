@@ -29,7 +29,6 @@
   margin: 0 auto;
 }
 
-/* ---- category sections ---- */
 .categorySection {
   margin-bottom: 64px;
 }
@@ -44,7 +43,7 @@
   border-bottom: 1px solid var(--line);
   position: relative;
 }
-/* The orange accent line — directly inspired by the dashes around "FOODS" in your logo */
+
 .categoryHead::after {
   content: '';
   position: absolute;
@@ -80,7 +79,6 @@
   gap: 26px;
 }
 
-/* ---- loading state ---- */
 .loading {
   min-height: 60vh;
   display: flex;
