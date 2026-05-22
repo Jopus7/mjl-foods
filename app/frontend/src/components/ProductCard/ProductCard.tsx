@@ -1,17 +1,34 @@
+import { useState } from 'react';
 import { Product } from '../../types';
 import styles from './ProductCard.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faUtensils } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   item: Product;
 }
 
 const ProductCard = ({ item }: Props) => {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className={styles.card}>
       <div className={styles.imageWrap}>
-        <img src={item.imageUrl} alt={item.name} className={styles.image} />
+        {!imgError ? (
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            className={styles.image}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className={styles.imageFallback}>
+            <FontAwesomeIcon
+              icon={faUtensils}
+              className={styles.fallbackIcon}
+            />
+          </div>
+        )}
       </div>
       <div className={styles.content}>
         <h3 className={styles.name}>{item.name}</h3>
