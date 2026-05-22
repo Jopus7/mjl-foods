@@ -1,0 +1,128 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(250, 246, 238, 0.85);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.navbar-container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.navbar-logo img {
+  height: 44px;
+  width: auto;
+  display: block;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  display: block;
+}
+
+.nav-links {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.nav-links:hover {
+  background: var(--cream-soft);
+  color: var(--ink);
+}
+
+.nav-cart {
+  display: flex;
+}
+
+.cart-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 14px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition:
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.cart-button:hover {
+  background: var(--orange);
+  transform: translateY(-1px);
+}
+
+.cart-icon {
+  font-size: 1rem;
+}
+
+.cart-count {
+  background: var(--orange);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 6px;
+}
+
+.cart-button:hover .cart-count {
+  background: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .navbar-container {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .nav-menu {
+    display: none;
+  }
+  .navbar-logo img {
+    height: 36px;
+  }
+}
