@@ -10,6 +10,7 @@ import Checkout from './pages/Checkout/Checkout';
 import OrderStatus from './pages/OrderStatus/OrderStatus';
 import { CartProvider } from './context/CartContext';
 import './index.css';
+import OrderFailed from './pages/OrderFailed/OrderFailed';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/status" element={<OrderStatus />} />
+            <Route path="/failed" element={<OrderFailed />} />
 
             <Route
               path="*"
