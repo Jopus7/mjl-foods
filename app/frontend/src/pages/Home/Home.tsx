@@ -64,10 +64,13 @@ const Home = () => {
             Świeże • Lokalne • Z miłością
           </span>
           <h1>
-            Smak, który <span className={styles['accent-orange']}>czujesz</span>
-            .<br />
-            Świeżość, którą{' '}
-            <span className={styles['accent-green']}>widać</span>.
+            Smak, który
+            <br />
+            <span className={styles['accent-orange']}>czujesz</span>
+            <br />
+            Świeżość, którą
+            <br />
+            <span className={styles['accent-green']}>widać</span>
           </h1>
           <p>
             Najlepsze smaki w Twoim mieście — gotowane z pasją, dostarczane

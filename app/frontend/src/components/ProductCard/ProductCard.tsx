@@ -1,20 +1,36 @@
-import React from 'react';
 import { Product } from '../../types';
 import styles from './ProductCard.module.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   item: Product;
 }
 
-const ProductCard: React.FC<Props> = ({ item }) => {
+const ProductCard = ({ item }: Props) => {
   return (
     <div className={styles.card}>
-      <img src={item.imageUrl} alt={item.name} className={styles.image} />
+      <div className={styles.imageWrap}>
+        <img src={item.imageUrl} alt={item.name} className={styles.image} />
+      </div>
       <div className={styles.content}>
-        <h3>{item.name}</h3>
-        <p>{item.description}</p>
-        <span className={styles.price}>{item.price} PLN</span>
-        <button className={styles.addButton}>Dodaj +</button>
+        <h3 className={styles.name}>{item.name}</h3>
+        <p className={styles.desc}>{item.description}</p>
+        <div className={styles.footer}>
+          <span className={styles.price}>
+            {item.price}
+            <span className={styles.currency}> zł</span>
+          </span>
+          <button
+            className={styles.addButton}
+            aria-label={`Dodaj ${item.name} do koszyka`}
+          >
+            <span className={styles.plus}>
+              <FontAwesomeIcon icon={faPlus} />
+            </span>
+            <span>Dodaj</span>
+          </button>
+        </div>
       </div>
     </div>
   );

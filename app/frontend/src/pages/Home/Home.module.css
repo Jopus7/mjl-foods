@@ -41,14 +41,14 @@
 
 .hero-text h1 {
   font-size: clamp(2.6rem, 5.5vw, 4.4rem);
-  line-height: 0.98;
-  letter-spacing: -0.025em;
   font-weight: 800;
 }
 
 .hero-text h1 .accent-orange {
   color: var(--orange);
   font-style: italic;
+  display: inline-block;
+  margin-bottom: 18px;
 }
 
 .hero-text h1 .accent-green {
@@ -67,7 +67,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-top: 28px;
+  margin-top: 10px;
   padding: 14px 26px;
   background: var(--orange);
   color: white;
