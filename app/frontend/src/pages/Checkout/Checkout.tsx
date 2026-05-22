@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styles from './Checkout.module.css';
 
-const Checkout: React.FC = () => {
+const Checkout = () => {
   const navigate = useNavigate();
   const [address, setAddress] = useState('');
   const [promoCode, setPromoCode] = useState('');
 
   const sendOrder = async () => {
-    // Backend: POST /api/order
     const response = await fetch('https://api.twoja-restauracja.pl/order', {
       method: 'POST',
       body: JSON.stringify({ address, promoCode, items: [] }),
@@ -24,7 +24,8 @@ const Checkout: React.FC = () => {
   };
 
   return (
-    <div className="checkout-container">
+    <div className={styles['checkout-container']}>
+      <span className={styles['hero-eyebrow']}>Krok 2 z 3</span>
       <h2>Dane do wysyłki</h2>
       <input
         placeholder="Adres zamieszkania"
@@ -32,11 +33,11 @@ const Checkout: React.FC = () => {
         onChange={(e) => setAddress(e.target.value)}
       />
       <input
-        placeholder="Kod rabatowy"
+        placeholder="Kod rabatowy (opcjonalnie)"
         value={promoCode}
         onChange={(e) => setPromoCode(e.target.value)}
       />
-      <button onClick={sendOrder}>Zamów i zapłać</button>
+      <button onClick={sendOrder}>Zamów i zapłać →</button>
     </div>
   );
 };

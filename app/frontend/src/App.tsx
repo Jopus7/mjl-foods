@@ -4,9 +4,9 @@ import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import Menu from './pages/Menu/Menu';
 import About from './pages/About/About';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import OrderStatus from './pages/OrderStatus';
+import Cart from './pages/Cart/Cart';
+import Checkout from './pages/Checkout/Checkout';
+import OrderStatus from './pages/OrderStatus/OrderStatus';
 import './index.css';
 
 function App() {
