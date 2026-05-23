@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
 
 from app.db.database import get_db
 from app.models.product import Product
@@ -12,24 +13,97 @@ def get_products(db: Session = Depends(get_db)):
     return db.query(Product).all()
 
 @router.get("/api/menu")
-def get_menu(db: Session = Depends(get_db)):
-    return {
-        "zupy": db.query(Product)
-        .filter(Product.category == "zupy")
-        .all(),
+def get_menu(
+    db: Session = Depends(get_db)
+):
+    zupy = (
+        db.query(Product)
+        .filter(
+            Product.category == "zupy"
+        )
+        .all()
+    )
 
-        "daniaGlowne": db.query(Product)
-        .filter(Product.category == "daniaGlowne")
-        .all(),
+    dania_glowne = (
+        db.query(Product)
+        .filter(
+            Product.category
+            == "daniaGlowne"
+        )
+        .all()
+    )
 
-        "desery": db.query(Product)
-        .filter(Product.category == "desery")
-        .all(),
+    desery = (
+        db.query(Product)
+        .filter(
+            Product.category
+            == "desery"
+        )
+        .all()
+    )
 
-        "napoje": db.query(Product)
-        .filter(Product.category == "napoje")
-        .all(),
-    }
+    napoje = (
+        db.query(Product)
+        .filter(
+            Product.category
+            == "napoje"
+        )
+        .all()
+    )
+
+    return [
+        {
+            "categoryName": "Zupy",
+            "items": [
+                ProductResponse.model_validate(
+                    item
+                ).model_dump(
+                    by_alias=True
+                )
+                for item in zupy
+            ]
+        },
+        {
+            "categoryName":
+            "Dania główne",
+
+            "items": [
+                ProductResponse.model_validate(
+                    item
+                ).model_dump(
+                    by_alias=True
+                )
+                for item
+                in dania_glowne
+            ]
+        },
+        {
+            "categoryName":
+            "Desery",
+
+            "items": [
+                ProductResponse.model_validate(
+                    item
+                ).model_dump(
+                    by_alias=True
+                )
+                for item in desery
+            ]
+        },
+        {
+            "categoryName":
+            "Napoje",
+
+            "items": [
+                ProductResponse.model_validate(
+                    item
+                ).model_dump(
+                    by_alias=True
+                )
+                for item in napoje
+            ]
+        }
+    ]
 
 @router.get(
     "/api/popular",
