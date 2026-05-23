@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductResponse
+from app.auth.auth import verify_token
 
 router = APIRouter()
 
@@ -46,7 +47,7 @@ def get_popular_products(
     )
 
 @router.post("/api/products", response_model=ProductResponse)
-def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+def create_product(product: ProductCreate, db: Session = Depends(get_db), user: str = Depends(verify_token)):
     new_product = Product(
     name=product.name,
     description=product.description,
@@ -65,11 +66,7 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     return new_product
 
 @router.put("/api/products/{product_id}", response_model=ProductResponse)
-def update_product(
-    product_id: int,
-    product: ProductCreate,
-    db: Session = Depends(get_db)
-):
+def update_product( product_id: int, product: ProductCreate, db: Session = Depends(get_db), user: str = Depends(verify_token)):
     db_product = (
         db.query(Product)
         .filter(Product.id == product_id)
@@ -99,7 +96,7 @@ def update_product(
     "/api/products/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(product_id: int, db: Session = Depends(get_db), user: str = Depends(verify_token)):
     db_product = db.query(Product).filter(Product.id == product_id).first()
 
     if not db_product:
