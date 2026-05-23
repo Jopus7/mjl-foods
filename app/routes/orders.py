@@ -6,10 +6,7 @@ from fastapi import (
 
 from sqlalchemy.orm import Session
 
-from datetime import (
-    datetime,
-    timedelta
-)
+from datetime import ( datetime, timedelta)
 
 import uuid
 
@@ -19,10 +16,7 @@ from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product import Product
 
-from app.schemas.order import (
-    OrderCreate,
-    OrderResponse
-)
+from app.schemas.order import ( OrderCreate, OrderResponse)
 
 router = APIRouter()
 
@@ -103,13 +97,15 @@ def create_order(
 
     new_order = Order(
         order_number=order_number,
-        first_name=order.customer.firstName,
-        last_name=order.customer.lastName,
+
+        full_name=order.customer.firstName,
+
         phone=order.customer.phone,
         email=order.customer.email,
+
         address=order.customer.address,
-        postal_code=order.customer.postalCode,
         city=order.customer.city,
+
         comment=order.comment,
         promo_code=order.promoCode,
 

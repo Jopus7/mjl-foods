@@ -13,16 +13,10 @@ class Order(Base):
         String,
         unique=True
     )
-
-    first_name = Column(
+    full_name = Column(
         String,
         nullable=False
-    )
-
-    last_name = Column(
-        String,
-        nullable=False
-    )
+)
 
     phone = Column(
         String,
@@ -39,10 +33,6 @@ class Order(Base):
         nullable=False
     )
 
-    postal_code = Column(
-        String,
-        nullable=False
-    )
 
     city = Column(
         String,
