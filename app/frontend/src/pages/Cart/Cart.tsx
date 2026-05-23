@@ -1,29 +1,24 @@
-import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './Cart.module.css';
-import { useCart } from '../../context/CartContext';
+import { useCartSummary } from '../../hooks/useCartSummary';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { cart, removeFromCart } = useCart();
-  const [promoCode, setPromoCode] = useState('');
-  const [discount, setDiscount] = useState(0);
-
-  const total = cart.reduce((acc, item) => acc + item.price, 0);
-  const discountedTotal = total - total * discount;
-
-  const handleApplyPromo = () => {
-    if (promoCode === 'promo123') {
-      setDiscount(0.2);
-    } else {
-      setDiscount(0);
-    }
-  };
+  const {
+    cart,
+    removeFromCart,
+    promoCode,
+    discount,
+    promoError,
+    total,
+    discountedTotal,
+    handleApplyPromo,
+    handlePromoChange,
+  } = useCartSummary();
 
   return (
     <div className={styles['cart-container']}>
       <h1>Twój koszyk</h1>
-
       <div className={styles['cart-list']}>
         {cart.length === 0 ? (
           <div className={styles['cart-empty']}>
@@ -59,20 +54,27 @@ const Cart = () => {
 
       {cart.length > 0 && (
         <>
-          <div className={styles['promo-section']}>
-            <input
-              type="text"
-              placeholder="Wpisz kod rabatowy"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              className={styles['promo-input']}
-            />
-            <button
-              onClick={handleApplyPromo}
-              className={styles['promo-button']}
-            >
-              Zastosuj
-            </button>
+          <div className={styles['promo-wrapper']}>
+            <div className={styles['promo-section']}>
+              <div className={styles['input-container']}>
+                <input
+                  type="text"
+                  placeholder="Wpisz kod rabatowy"
+                  value={promoCode}
+                  onChange={(e) => handlePromoChange(e.target.value)}
+                  className={`${styles['promo-input']} ${promoError ? styles['input-error'] : ''}`}
+                />
+                {promoError && (
+                  <span className={styles['error-text']}>{promoError}</span>
+                )}
+              </div>
+              <button
+                onClick={handleApplyPromo}
+                className={styles['promo-button']}
+              >
+                Zastosuj
+              </button>
+            </div>
           </div>
 
           <div className={styles.summary}>
@@ -85,7 +87,11 @@ const Cart = () => {
               )}
               <em>{discountedTotal.toFixed(2)} zł</em>
             </h3>
-            <button onClick={() => navigate('/checkout')}>
+            <button
+              onClick={() =>
+                navigate('/checkout', { state: { promoCode, discount } })
+              }
+            >
               Przejdź dalej →
             </button>
           </div>

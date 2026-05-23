@@ -43,11 +43,20 @@
   display: block;
   margin-bottom: 12px;
 }
+.promo-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
 .promo-section {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
-  justify-content: flex-end;
+  align-items: flex-start;
+}
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .promo-input {
   padding: 10px 16px;
@@ -61,12 +70,22 @@
 .promo-input:focus {
   border-color: var(--orange);
 }
+.input-error {
+  border-color: #dc3545 !important;
+}
+.error-text {
+  color: #dc3545;
+  font-size: 0.85rem;
+  padding-left: 16px;
+}
 .promo-button {
   padding: 10px 20px;
   background: var(--ink);
   color: var(--cream);
   border-radius: var(--radius-pill);
   font-weight: 600;
+  height: 40px;
+  box-sizing: border-box;
   transition:
     background 180ms ease,
     transform 180ms ease;

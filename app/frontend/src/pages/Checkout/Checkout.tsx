@@ -1,91 +1,26 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './Checkout.module.css';
+import { useCheckout } from '../../hooks/useCheckout';
 
 const Checkout = () => {
-  const navigate = useNavigate();
-  const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>(
-    'delivery'
-  );
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [street, setStreet] = useState('');
-  const [building, setBuilding] = useState('');
-  const [apartment, setApartment] = useState('');
-  const [city, setCity] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!name.trim()) {
-      newErrors.name = 'Imię i nazwisko jest wymagane';
-    }
-
-    const phoneRegex = /^[0-9]{9}$/;
-    const cleanedPhone = phone.replace(/\s+/g, '');
-    if (!phoneRegex.test(cleanedPhone)) {
-      newErrors.phone = 'Podaj poprawny 9-cyfrowy numer telefonu';
-    }
-
-    if (deliveryMethod === 'delivery') {
-      if (!street.trim()) newErrors.street = 'Ulica jest wymagana';
-
-      const buildingRegex = /^[0-9]+$/;
-      if (!building.trim()) {
-        newErrors.building = 'Nr budynku jest wymagany';
-      } else if (!buildingRegex.test(building.trim())) {
-        newErrors.building = 'Nr budynku musi być liczbą';
-      }
-
-      if (!city.trim()) newErrors.city = 'Miasto jest wymagane';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const sendOrder = async () => {
-    if (!validate()) return;
-
-    try {
-      const orderData = {
-        deliveryMethod,
-        name,
-        phone,
-        ...(deliveryMethod === 'delivery' && {
-          street,
-          building,
-          apartment,
-          city,
-        }),
-        items: [],
-      };
-
-      const response = await fetch('https://api.twoja-restauracja.pl/order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        navigate('/status', {
-          state: {
-            deliveryTime:
-              result.estimatedDeliveryTime ||
-              new Date(Date.now() + 45 * 60000).toISOString(),
-          },
-        });
-      } else {
-        navigate('/failed');
-      }
-    } catch (error) {
-      navigate('/failed');
-    }
-  };
+  const {
+    deliveryMethod,
+    setDeliveryMethod,
+    name,
+    setName,
+    phone,
+    setPhone,
+    street,
+    setStreet,
+    building,
+    setBuilding,
+    apartment,
+    setApartment,
+    city,
+    setCity,
+    errors,
+    setErrors,
+    sendOrder,
+  } = useCheckout();
 
   return (
     <div className={styles['checkout-container']}>

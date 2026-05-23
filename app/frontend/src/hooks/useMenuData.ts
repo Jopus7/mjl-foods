@@ -1,51 +1,47 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Category } from '../types';
+
+const CATEGORY_MAPPING: Record<string, string> = {
+  zupy: 'Zupy',
+  daniaGlowne: 'Dania główne',
+  desery: 'Desery',
+  napoje: 'Napoje',
+};
 
 export const useMenuData = () => {
   const [menu, setMenu] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Tu będzie pobieranie danych z backendu
-    // Na razie zwracamy mockowe dane jako placeholder
     const fetchMenu = async () => {
-      setIsLoading(true);
-      const mockData: Category[] = [
-        {
-          categoryName: 'Pizze',
-          items: [
-            {
-              id: 1,
-              name: 'Margherita',
-              description: 'Klasyka: sos, mozarella',
-              price: 32,
-              imageUrl: 'https://via.placeholder.com/150',
-            },
-            {
-              id: 2,
-              name: 'Capriciosa',
-              description: 'Szynka, pieczarki',
-              price: 38,
-              imageUrl: 'https://via.placeholder.com/150',
-            },
-          ],
-        },
-        {
-          categoryName: 'Burgery',
-          items: [
-            {
-              id: 3,
-              name: 'Classic Burger',
-              description: 'Wołowina 100%',
-              price: 35,
-              imageUrl: 'https://via.placeholder.com/150',
-            },
-          ],
-        },
-      ];
+      try {
+        setIsLoading(true);
+        const response = await axios.get('http://127.0.0.1:8000/api/menu');
+        const backendData = response.data;
 
-      setMenu(mockData);
-      setIsLoading(false);
+        const formattedMenu: Category[] = Object.keys(backendData).map(
+          (key) => ({
+            categoryName: CATEGORY_MAPPING[key] || key,
+            items: backendData[key].map((item: any) => ({
+              id: item.id,
+              name: item.name,
+              description: item.description,
+              price: item.price,
+              imageUrl: item.image_url,
+              available: item.available,
+              isPopular: item.is_popular,
+              category: item.category,
+            })),
+          })
+        );
+
+        setMenu(formattedMenu);
+      } catch (error) {
+        setMenu([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchMenu();
