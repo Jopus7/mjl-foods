@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import AboutIllustration from '../../components/AboutIllustration';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -7,7 +8,55 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import styles from './About.module.css';
 
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const DefaultIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
 const About = () => {
+  const position: [number, number] = [52.2297, 21.0122];
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapInstanceRef.current) return;
+
+    const map = L.map(mapContainerRef.current, {
+      center: position,
+      zoom: 15,
+      scrollWheelZoom: false,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    L.marker(position)
+      .addTo(map)
+      .bindPopup(
+        '<strong>MJL Foods</strong><br />ul. Marszałkowska 100<br />00-016 Warszawa'
+      );
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className={styles['about-container']}>
       <header className={styles['about-hero']}>
@@ -114,6 +163,17 @@ const About = () => {
           jedzenie ma znaczenie. Każdego dnia dbamy o to, żeby smak, jakość i
           obsługa były na poziomie, do którego sami chcielibyśmy wracać.
         </p>
+      </div>
+
+      <div className={`${styles['about-team']} ${styles['about-location']}`}>
+        <h2>Gdzie nas znajdziesz?</h2>
+        <p>Zapraszamy do naszej restauracji w sercu Warszawy!</p>
+        <div className={styles['map-wrapper']}>
+          <div
+            ref={mapContainerRef}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
       </div>
     </div>
   );
