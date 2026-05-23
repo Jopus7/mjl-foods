@@ -4,11 +4,9 @@ from typing import Optional
 
 class CustomerSchema(BaseModel):
     firstName: str
-    lastName: str
     phone: str
     email: EmailStr
     address: str
-    postalCode: str
     city: str
 
 
