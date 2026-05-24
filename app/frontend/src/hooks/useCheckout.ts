@@ -98,7 +98,7 @@ export const useCheckout = () => {
       customer: {
         firstName: name,
         phone,
-        email: 'klient@example.com',
+        email: 'micha.j@gmail.com',
         address: fullAddress,
         city:
           deliveryMethod === 'delivery'
