@@ -13,15 +13,46 @@ export const useOrderStatus = () => {
 
   const params = new URLSearchParams(search);
   const deliveryTime =
-    locationState?.deliveryTime ?? params.get('deliveryTime') ?? null;
+  locationState?.deliveryTime ??
+  params.get('deliveryTime') ??
+  JSON.parse(
+    sessionStorage.getItem(
+      'deliveryTime'
+    ) || 'null'
+  ) ??
+  null;
   const orderId = locationState?.orderId ?? params.get('orderId') ?? null;
 
   const [timeLeft, setTimeLeft] = useState<string>('');
 
   useEffect(() => {
+    console.log('DELIVERY TIME:', deliveryTime)
     if (!deliveryTime) return;
 
-    const delivery = new Date(deliveryTime).getTime();
+    const formattedTime =
+      deliveryTime.replace(
+        /(\.\d{3})\d+/,
+        '$1'
+      );
+    console.log(
+    'FORMATTED:',
+    formattedTime
+  );
+
+  console.log(
+    'DATE:',
+    new Date(formattedTime)
+  );
+
+  console.log(
+    'TIMESTAMP:',
+    new Date(
+      formattedTime
+    ).getTime()
+  );
+
+
+    const delivery = new Date(formattedTime).getTime();
     const now = new Date().getTime();
 
     if (delivery - now <= 0) {
@@ -34,7 +65,7 @@ export const useOrderStatus = () => {
     }
 
     const timer = setInterval(() => {
-      const diff = new Date(deliveryTime).getTime() - new Date().getTime();
+      const diff = new Date(formattedTime).getTime() - new Date().getTime();
 
       if (diff <= 0) {
         clearInterval(timer);
