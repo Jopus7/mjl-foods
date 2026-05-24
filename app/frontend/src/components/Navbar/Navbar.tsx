@@ -5,6 +5,7 @@ import {
   faHouse,
   faUtensils,
   faInfoCircle,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import logo2 from '../../assets/logo2.png';
 import styles from './Navbar.module.css';
@@ -18,7 +19,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Górny Navbar (Desktop + Logo na mobile) */}
       <nav className={styles.navbar}>
         <div className={styles['navbar-container']}>
           <Link
@@ -33,7 +33,6 @@ const Navbar = () => {
             />
           </Link>
 
-          {/* Menu Desktopowe */}
           <ul className={styles['nav-menu']}>
             <li className={styles['nav-item']}>
               <Link to="/" className={styles['nav-links']}>
@@ -52,20 +51,28 @@ const Navbar = () => {
             </li>
           </ul>
 
-          {/* Koszyk Desktopowy */}
-          <div className={styles['nav-cart']}>
-            <Link to="/cart" className={styles['cart-button']}>
-              <span className={styles['cart-icon']} aria-hidden="true">
-                <FontAwesomeIcon icon={faCartShopping} />
-              </span>
-              <span>Koszyk</span>
-              <span className={styles['cart-count']}>{cart.length}</span>
+          <div className={styles['nav-actions']}>
+            <Link
+              to="/profile"
+              className={styles['profile-button']}
+              aria-label="Mój profil"
+            >
+              <FontAwesomeIcon icon={faUser} />
             </Link>
+
+            <div className={styles['nav-cart']}>
+              <Link to="/cart" className={styles['cart-button']}>
+                <span className={styles['cart-icon']} aria-hidden="true">
+                  <FontAwesomeIcon icon={faCartShopping} />
+                </span>
+                <span>Koszyk</span>
+                <span className={styles['cart-count']}>{cart.length}</span>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Dolny pasek nawigacyjny dla Mobile (widoczny tylko na małych ekranach) */}
       <nav className={styles['mobile-bottom-nav']}>
         <Link
           to="/"
@@ -114,6 +121,17 @@ const Navbar = () => {
             )}
           </div>
           <span>Koszyk</span>
+        </Link>
+
+        <Link
+          to="/profile"
+          className={`${styles['bottom-nav-item']} ${isActive('/profile') ? styles.active : ''}`}
+        >
+          <FontAwesomeIcon
+            icon={faUser}
+            className={styles['bottom-nav-icon']}
+          />
+          <span>Profil</span>
         </Link>
       </nav>
     </>
