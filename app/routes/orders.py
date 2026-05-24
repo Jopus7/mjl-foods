@@ -16,6 +16,8 @@ from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product import Product
 
+from app.services.email_service import (send_order_email)
+
 from app.schemas.order import ( OrderCreate, OrderResponse)
 
 router = APIRouter()
@@ -145,6 +147,15 @@ def create_order(
         db.add(order_item)
 
     db.commit()
+
+    send_order_email(
+        email=order.customer.email,
+        order_number=order_number,
+        delivery_time=
+        estimated_delivery.strftime(
+            "%H:%M"
+        )
+    )
 
     return {
         "success": True,
