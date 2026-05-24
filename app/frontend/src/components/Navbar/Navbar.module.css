@@ -24,13 +24,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.25rem;
-  letter-spacing: -0.01em;
-  color: var(--ink);
 }
-
 .navbar-logo img {
   height: 44px;
   width: auto;
@@ -45,11 +39,9 @@
   margin: 0;
   padding: 0;
 }
-
 .nav-item {
   display: block;
 }
-
 .nav-links {
   display: inline-block;
   padding: 8px 16px;
@@ -57,20 +49,42 @@
   font-weight: 500;
   font-size: 0.95rem;
   color: var(--ink-soft);
-  transition:
-    background 180ms ease,
-    color 180ms ease;
+  text-decoration: none;
+  transition: background 180ms ease, color 180ms ease;
 }
-
 .nav-links:hover {
   background: var(--cream-soft);
   color: var(--ink);
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--cream-soft);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+  font-size: 0.95rem;
+}
+.profile-button:hover {
+  background: var(--orange);
+  color: white;
+  transform: translateY(-1px);
+}
+
 .nav-cart {
   display: flex;
 }
-
 .cart-button {
   position: relative;
   display: inline-flex;
@@ -82,20 +96,16 @@
   border-radius: var(--radius-pill);
   font-weight: 600;
   font-size: 0.9rem;
-  transition:
-    transform 180ms ease,
-    background 180ms ease;
+  text-decoration: none;
+  transition: transform 180ms ease, background 180ms ease;
 }
-
 .cart-button:hover {
   background: var(--orange);
   transform: translateY(-1px);
 }
-
 .cart-icon {
   font-size: 1rem;
 }
-
 .cart-count {
   background: var(--orange);
   color: white;
@@ -109,90 +119,86 @@
   border-radius: 999px;
   padding: 0 6px;
 }
-
 .cart-button:hover .cart-count {
   background: var(--ink);
 }
 
-/* --- MOBILE BOTTOM NAV --- */
 .mobile-bottom-nav {
   display: none;
 }
 
 @media (max-width: 640px) {
-  /* Zmieniamy górny pasek na mobile - tylko wyśrodkowane logo */
   .navbar-container {
     padding: 10px 16px;
-    justify-content: center;
   }
-  .nav-menu,
+  .nav-menu {
+    display: none;
+  }
   .nav-cart {
+    display: none;
+  }
+  .profile-button {
     display: none;
   }
   .navbar-logo img {
     height: 36px;
   }
 
-  /* Pokazujemy i stylujemy dolny pasek */
   .mobile-bottom-nav {
-    display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
     background: var(--paper);
     border-top: 1px solid var(--line);
-    z-index: 50;
-    padding-bottom: env(safe-area-inset-bottom); /* dla iPhone'ów bez ramki */
-    justify-content: space-around;
-    align-items: center;
-    height: 68px;
-    box-shadow: 0 -4px 10px rgba(31, 31, 46, 0.04);
+    padding: 6px 4px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    box-shadow: 0 -6px 20px rgba(31, 31, 46, 0.05);
   }
 
   .bottom-nav-item {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    color: var(--ink-mute);
+    gap: 4px;
+    padding: 6px 4px;
     font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    flex: 1;
-    height: 100%;
+    font-weight: 500;
+    color: var(--ink-mute);
+    text-decoration: none;
     transition: color 180ms ease;
   }
-
   .bottom-nav-item.active {
     color: var(--orange);
   }
-
   .bottom-nav-icon {
-    font-size: 1.3rem;
+    font-size: 1.15rem;
   }
 
   .bottom-nav-cart-wrapper {
     position: relative;
     display: inline-flex;
   }
-
   .bottom-cart-badge {
     position: absolute;
     top: -6px;
     right: -10px;
+    min-width: 18px;
+    height: 18px;
     background: var(--orange);
     color: white;
     font-size: 0.65rem;
     font-weight: 700;
-    min-width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
+    border-radius: 999px;
+    padding: 0 5px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--paper);
   }
 }
