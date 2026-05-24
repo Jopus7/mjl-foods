@@ -79,59 +79,119 @@ export const useCheckout = () => {
   };
 
   const sendOrder = async (): Promise<void> => {
-    if (!validate()) return;
+  if (!validate()) return;
 
-    try {
-      const nameParts = name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
+  try {
+    // const nameParts = name.trim().split(' ');
+    // const firstName = nameParts[0] || '';
+    // const lastName =
+    //   nameParts.slice(1).join(' ') || '';
 
-      const fullAddress =
-        deliveryMethod === 'delivery'
-          ? `${street} ${building}${apartment ? '/' + apartment : ''}`
-          : 'Odbiór osobisty';
+    const fullAddress =
+      deliveryMethod === 'delivery'
+        ? `${street} ${building}${
+            apartment ? '/' + apartment : ''
+          }`
+        : 'Odbiór osobisty';
 
-      const orderData = {
-        customer: {
-          firstName,
-          lastName,
-          phone,
-          email: 'klient@example.com',
-          address: fullAddress,
-          postalCode: '00-000',
-          city: deliveryMethod === 'delivery' ? city : 'Warszawa',
-        },
-        comment: `Metoda dostawy: ${deliveryMethod}`,
-        promoCode: promoCode || null,
-        items: cart.map((item) => ({
-          productId: item.id || item.cartItemId,
-          quantity: 1,
-        })),
-      };
+    const orderData = {
+      customer: {
+        firstName: name,
+        phone,
+        email: 'klient@example.com',
+        address: fullAddress,
+        city:
+          deliveryMethod === 'delivery'
+            ? city
+            : 'Warszawa',
+      },
 
-      const response = await fetch('http://127.0.0.1:8000/api/orders/create', {
+      comment:
+        `Metoda dostawy: ${deliveryMethod}`,
+
+      promoCode: promoCode || null,
+
+      items: cart.map((item) => ({
+        productId:
+          item.id || item.cartItemId,
+
+        quantity: 1,
+      })),
+    };
+
+    const response = await fetch(
+      'http://127.0.0.1:8000/api/orders/create',
+      {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type':
+            'application/json',
         },
         body: JSON.stringify(orderData),
-      });
+      }
+    );
 
-      if (response.ok) {
-        const result = (await response.json()) as OrderResponseData;
+    if (response.ok) {
+       const result: OrderResponseData =
+          await response.json();
+
+      console.log('RESULT:', result);
+
+      const stripeResponse =
+        await fetch(
+          'http://127.0.0.1:8000/api/create-checkout-session',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'application/json',
+            },
+
+            body: JSON.stringify({
+              items: cart.map(
+                (item) => ({
+                  productId:
+                    item.id ||
+                    item.cartItemId,
+
+                  quantity: 1,
+                })
+              ),
+            }),
+          }
+        );
+
+      const stripeResult =
+        await stripeResponse.json();
+
+      if (stripeResponse.ok) {
         clearCart();
-        navigate('/status', {
-          state: {
-            deliveryTime: result.estimatedDeliveryTime,
-          },
-        });
+
+        sessionStorage.setItem(
+          'deliveryTime',
+          JSON.stringify(
+            result.estimatedDeliveryTime
+          )
+        );
+
+        console.log(
+          sessionStorage.getItem(
+            'deliveryTime'
+          )
+        );
+
+window.location.href =
+  stripeResult.checkoutUrl;
       } else {
         navigate('/failed');
       }
-    } catch (error) {
+    } else {
       navigate('/failed');
     }
-  };
+  } catch (error) {
+    navigate('/failed');
+  }
+};
 
   return {
     deliveryMethod,
