@@ -164,3 +164,32 @@ def create_order(
             estimated_delivery.isoformat(),
         "status": "accepted"
     }
+@router.put(
+    "/api/orders/{order_id}/status"
+)
+def update_order_status(
+    order_id: int,
+    status: str,
+    db: Session = Depends(get_db)
+):
+    order = (
+        db.query(Order)
+        .filter(
+            Order.id == order_id
+        )
+        .first()
+    )
+
+    if not order:
+        raise HTTPException(
+            status_code=404,
+            detail=
+            "Order not found"
+        )
+
+    order.status = status
+
+    db.commit()
+    db.refresh(order)
+
+    return order
