@@ -19,6 +19,8 @@ import OrderDetails from './pages/Profile/OrderDetails';
 import { useAuth } from './context/AuthContext';
 import './index.css';
 import ScrollToTop from './components/ScrollToTop/ScrollToTop';
+import Admin from './pages/Admin/Admin';
+import AdminLogin from './pages/Admin/AdminLogin';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -56,6 +58,15 @@ function App() {
                 <OrderDetails />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/admin"
+            element={<AdminLogin />}
+          />
+
+          <Route
+            path="/admin/dashboard"
+            element={<Admin />}
           />
 
           <Route

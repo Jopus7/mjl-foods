@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.product import Product
+from app.models.order import Order
 from app.schemas.product import ProductCreate, ProductResponse
 from app.auth.auth import verify_token
 
@@ -106,3 +107,56 @@ def delete_product(product_id: int, db: Session = Depends(get_db), user: str = D
     db.commit()
 
     return {"message": "Deleted"}
+
+@router.put(
+    "/api/orders/{order_id}/status"
+)
+def update_order_status(
+    order_id: int,
+    status: str,
+    db: Session = Depends(get_db),
+    user: str = Depends(
+        verify_token
+    )
+):
+    order = (
+        db.query(Order)
+        .filter(
+            Order.id == order_id
+        )
+        .first()
+    )
+
+    if not order:
+        raise HTTPException(
+            status_code=404,
+            detail=
+            "Order not found"
+        )
+
+    allowed_statuses = [
+        "accepted",
+        "preparing",
+        "on_the_way",
+        "delivered"
+    ]
+
+    if status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=
+            "Invalid status"
+        )
+
+    order.status = status
+
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "message":
+        "Order updated",
+
+        "status":
+        order.status
+    }

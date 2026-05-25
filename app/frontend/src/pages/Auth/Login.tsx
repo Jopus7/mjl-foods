@@ -12,18 +12,36 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
 
-    if (!email || !password) {
-      setError('Wypełnij wszystkie pola.');
-      return;
-    }
+  const handleSubmit = async (
+  e: React.FormEvent
+) => {
+  console.log('submit works');
+  e.preventDefault();
+  setError('');
 
-    await login(email, password);
-    navigate('/profile');
-  };
+  if (!email || !password) {
+    setError(
+      'Wypełnij wszystkie pola.'
+    );
+    return;
+  }
+
+  try {
+    await login(
+      email,
+      password
+    );
+
+    navigate(
+      '/admin/dashboard'
+    );
+  } catch {
+    setError(
+      'Nieprawidłowy email lub hasło'
+    );
+  }
+};
 
   return (
     <div className={styles['auth-container']}>
