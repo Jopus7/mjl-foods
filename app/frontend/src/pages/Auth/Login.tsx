@@ -34,7 +34,7 @@ const Login = () => {
     );
 
     navigate(
-      '/admin/dashboard'
+      '/profile'
     );
   } catch {
     setError(
