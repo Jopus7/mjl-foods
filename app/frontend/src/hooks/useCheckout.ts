@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { API_BASE_URL } from '../../../../config';
 
 interface LocationState {
   promoCode?: string;
@@ -79,119 +80,76 @@ export const useCheckout = () => {
   };
 
   const sendOrder = async (): Promise<void> => {
-  if (!validate()) return;
+    if (!validate()) return;
 
-  try {
-    // const nameParts = name.trim().split(' ');
-    // const firstName = nameParts[0] || '';
-    // const lastName =
-    //   nameParts.slice(1).join(' ') || '';
+    try {
+      const fullAddress =
+        deliveryMethod === 'delivery'
+          ? `${street} ${building}${apartment ? '/' + apartment : ''}`
+          : 'Odbiór osobisty';
 
-    const fullAddress =
-      deliveryMethod === 'delivery'
-        ? `${street} ${building}${
-            apartment ? '/' + apartment : ''
-          }`
-        : 'Odbiór osobisty';
+      const orderData = {
+        customer: {
+          firstName: name,
+          phone,
+          email: 'micha.j@gmail.com',
+          address: fullAddress,
+          city: deliveryMethod === 'delivery' ? city : 'Warszawa',
+        },
+        comment: `Metoda dostawy: ${deliveryMethod}`,
+        promoCode: promoCode || null,
+        items: cart.map((item) => ({
+          productId: item.id || item.cartItemId,
+          quantity: 1,
+        })),
+      };
 
-    const orderData = {
-      customer: {
-        firstName: name,
-        phone,
-        email: 'micha.j@gmail.com',
-        address: fullAddress,
-        city:
-          deliveryMethod === 'delivery'
-            ? city
-            : 'Warszawa',
-      },
-
-      comment:
-        `Metoda dostawy: ${deliveryMethod}`,
-
-      promoCode: promoCode || null,
-
-      items: cart.map((item) => ({
-        productId:
-          item.id || item.cartItemId,
-
-        quantity: 1,
-      })),
-    };
-
-    const response = await fetch(
-      'http://127.0.0.1:8000/api/orders/create',
-      {
+      const response = await fetch(`${API_BASE_URL}/orders/create`, {
         method: 'POST',
         headers: {
-          'Content-Type':
-            'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(orderData),
-      }
-    );
+      });
 
-    if (response.ok) {
-       const result: OrderResponseData =
-          await response.json();
+      if (response.ok) {
+        const result: OrderResponseData = await response.json();
 
-      console.log('RESULT:', result);
-
-      const stripeResponse =
-        await fetch(
-          'http://127.0.0.1:8000/api/create-checkout-session',
+        const stripeResponse = await fetch(
+          `${API_BASE_URL}/create-checkout-session`,
           {
             method: 'POST',
             headers: {
-              'Content-Type':
-                'application/json',
+              'Content-Type': 'application/json',
             },
-
             body: JSON.stringify({
-              items: cart.map(
-                (item) => ({
-                  productId:
-                    item.id ||
-                    item.cartItemId,
-
-                  quantity: 1,
-                })
-              ),
+              items: cart.map((item) => ({
+                productId: item.id || item.cartItemId,
+                quantity: 1,
+              })),
             }),
           }
         );
 
-      const stripeResult =
-        await stripeResponse.json();
+        const stripeResult = await stripeResponse.json();
 
-      if (stripeResponse.ok) {
-        clearCart();
-
-        sessionStorage.setItem(
-          'deliveryTime',
-          JSON.stringify(
-            result.estimatedDeliveryTime
-          )
-        );
-
-        console.log(
-          sessionStorage.getItem(
-            'deliveryTime'
-          )
-        );
-
-window.location.href =
-  stripeResult.checkoutUrl;
+        if (stripeResponse.ok) {
+          clearCart();
+          sessionStorage.setItem(
+            'deliveryTime',
+            JSON.stringify(result.estimatedDeliveryTime)
+          );
+          window.location.href = stripeResult.checkoutUrl;
+        } else {
+          navigate('/failed');
+        }
       } else {
         navigate('/failed');
       }
-    } else {
+    } catch (error) {
       navigate('/failed');
     }
-  } catch (error) {
-    navigate('/failed');
-  }
-};
+  };
 
   return {
     deliveryMethod,
