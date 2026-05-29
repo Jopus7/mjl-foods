@@ -16,7 +16,7 @@ beforeEach(() => {
 describe('AdminLogin', () => {
   it('renderuje nagłówek Admin Login', () => {
     render(<AdminLogin />);
-    expect(screen.getByText('Admin Login')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Admin/i })).toBeInTheDocument();
   });
 
   it('renderuje pole email', () => {
@@ -26,12 +26,14 @@ describe('AdminLogin', () => {
 
   it('renderuje pole hasła', () => {
     render(<AdminLogin />);
-    expect(screen.getByPlaceholderText('Hasło')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
   });
 
   it('renderuje przycisk Zaloguj', () => {
     render(<AdminLogin />);
-    expect(screen.getByRole('button', { name: 'Zaloguj' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Zaloguj się/i })
+    ).toBeInTheDocument();
   });
 
   it('nie wyświetla błędu na początku', () => {
@@ -44,7 +46,7 @@ describe('AdminLogin', () => {
   it('wyświetla błąd gdy fetch zwraca błąd', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false });
     render(<AdminLogin />);
-    fireEvent.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    fireEvent.click(screen.getByRole('button', { name: /Zaloguj się/i }));
     expect(
       await screen.findByText('Niepoprawne dane logowania')
     ).toBeInTheDocument();
@@ -55,7 +57,7 @@ describe('AdminLogin', () => {
       new Error('Network error')
     );
     render(<AdminLogin />);
-    fireEvent.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    fireEvent.click(screen.getByRole('button', { name: /Zaloguj się/i }));
     expect(
       await screen.findByText('Niepoprawne dane logowania')
     ).toBeInTheDocument();
@@ -70,11 +72,11 @@ describe('AdminLogin', () => {
     fireEvent.change(screen.getByPlaceholderText('admin'), {
       target: { value: 'admin@test.com' },
     });
-    fireEvent.change(screen.getByPlaceholderText('Hasło'), {
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), {
       target: { value: 'haslo123' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Zaloguj' }));
-    await screen.findByRole('button', { name: 'Zaloguj' });
+    fireEvent.click(screen.getByRole('button', { name: /Zaloguj się/i }));
+    await screen.findByRole('button', { name: /Zaloguj się/i });
     expect(localStorage.getItem('token')).toBe('test-token');
     expect(localStorage.getItem('isAdmin')).toBe('true');
   });
@@ -85,8 +87,8 @@ describe('AdminLogin', () => {
       json: async () => ({ access_token: 'test-token' }),
     });
     render(<AdminLogin />);
-    fireEvent.click(screen.getByRole('button', { name: 'Zaloguj' }));
-    await screen.findByRole('button', { name: 'Zaloguj' });
+    fireEvent.click(screen.getByRole('button', { name: /Zaloguj się/i }));
+    await screen.findByRole('button', { name: /Zaloguj się/i });
     expect(mockNavigate).toHaveBeenCalledWith('/admin/dashboard');
   });
 });
