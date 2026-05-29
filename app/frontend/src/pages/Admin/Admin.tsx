@@ -1,179 +1,358 @@
+import { useEffect, useState } from 'react';
+
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEnvelope,
   faRightFromBracket,
-  faPlus,
-  faPen,
-  faTrash,
 } from '@fortawesome/free-solid-svg-icons';
-import { useAdmin } from '../../hooks/useAdmin';
-import profileStyles from '../Profile/Profile.module.css';
-import authStyles from '../Auth/Auth.module.css';
-import styles from './Admin.module.css';
+import { useAuth } from '../../context/AuthContext';
+import styles from '../Profile/Profile.module.css';
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+}
+
+interface Order {
+  id: number;
+  order_number: string;
+  full_name: string;
+  status: string;
+}
 
 const Admin = () => {
-  const {
-    products,
-    orders,
-    newProduct,
-    setNewProduct,
-    handleLogout,
-    deleteProduct,
-    createProduct,
-    editProduct,
-    updateOrderStatus,
-  } = useAdmin();
+  const navigate = useNavigate();
+
+  const { logout } = useAuth();
+
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: '',
+    category: '',
+  });
+
+  useEffect(() => {
+    const isAdmin = localStorage.getItem('isAdmin');
+
+    if (!isAdmin) {
+      navigate('/admin');
+      return;
+    }
+
+    fetch('http://127.0.0.1:8000/api/products')
+      .then((res) => res.json())
+      .then(setProducts);
+
+    fetch('http://127.0.0.1:8000/api/orders')
+      .then((res) => res.json())
+      .then(setOrders);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAdmin');
+    logout();
+    navigate('/admin');
+  };
+  const deleteProduct = async (productId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/products/${productId}`,
+        {
+          method: 'DELETE',
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setProducts(products.filter((product) => product.id !== productId));
+      } else {
+        alert('Nie udało się usunąć produktu');
+      }
+    } catch {
+      alert('Błąd serwera');
+    }
+  };
+  const createProduct = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch('http://127.0.0.1:8000/api/products', {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          name: newProduct.name,
+
+          description: '',
+
+          price: Number(newProduct.price),
+
+          image_url: '',
+
+          available: true,
+
+          is_popular: false,
+
+          category: newProduct.category,
+        }),
+      });
+
+      if (response.ok) {
+        const created = await response.json();
+
+        setProducts([...products, created]);
+
+        setNewProduct({
+          name: '',
+          price: '',
+          category: '',
+        });
+      }
+    } catch {
+      alert('Błąd dodawania produktu');
+    }
+  };
+  const editProduct = async (product: Product) => {
+    const name = prompt('Nazwa produktu', product.name);
+
+    if (!name) return;
+
+    const price = prompt('Cena produktu', String(product.price));
+
+    if (!price) return;
+
+    const category = prompt('Kategoria', product.category);
+
+    if (!category) return;
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/products/${product.id}`,
+        {
+          method: 'PUT',
+
+          headers: {
+            'Content-Type': 'application/json',
+
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            name,
+            description: '',
+
+            price: Number(price),
+
+            image_url: '',
+
+            available: true,
+
+            is_popular: false,
+
+            category,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const updated = await response.json();
+
+        setProducts(products.map((p) => (p.id === product.id ? updated : p)));
+      }
+    } catch {
+      alert('Nie udało się edytować produktu');
+    }
+  };
+  const updateOrderStatus = async (orderId: number, status: string) => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/orders/${orderId}/status?status=${status}`,
+        {
+          method: 'PUT',
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setOrders(
+          orders.map((order) =>
+            order.id === orderId
+              ? {
+                  ...order,
+                  status,
+                }
+              : order
+          )
+        );
+      }
+    } catch {
+      alert('Błąd aktualizacji statusu');
+    }
+  };
 
   return (
-    <div className={profileStyles['profile-container']}>
-      <div className={profileStyles['profile-header']}>
-        <div className={profileStyles.avatar}>A</div>
+    <div className={styles['profile-container']}>
+      <div className={styles['profile-header']}>
+        <div className={styles.avatar}>A</div>
 
-        <div className={profileStyles['user-info']}>
-          <h1 className={profileStyles['user-name']}>Admin Panel</h1>
-          <div className={profileStyles['user-meta']}>
-            <span className={profileStyles['user-meta-item']}>
+        <div className={styles['user-info']}>
+          <h1 className={styles['user-name']}>Admin Panel</h1>
+
+          <div className={styles['user-meta']}>
+            <span className={styles['user-meta-item']}>
               <FontAwesomeIcon icon={faEnvelope} />
               admin@mjlfoods.com
             </span>
           </div>
         </div>
 
-        <button
-          className={profileStyles['logout-button']}
-          onClick={handleLogout}
-        >
+        <button className={styles['logout-button']} onClick={handleLogout}>
           <FontAwesomeIcon icon={faRightFromBracket} />
+
           <span>Wyloguj</span>
         </button>
       </div>
 
-      <div className={profileStyles['stats-grid']}>
-        <div className={profileStyles['stat-card']}>
-          <span className={profileStyles['stat-num']}>{products.length}</span>
-          <span className={profileStyles['stat-label']}>Produktów</span>
+      <div className={styles['stats-grid']}>
+        <div className={styles['stat-card']}>
+          <span className={styles['stat-num']}>{products.length}</span>
+
+          <span className={styles['stat-label']}>Produktów</span>
         </div>
-        <div className={profileStyles['stat-card']}>
-          <span className={profileStyles['stat-num']}>{orders.length}</span>
-          <span className={profileStyles['stat-label']}>Zamówień</span>
+
+        <div className={styles['stat-card']}>
+          <span className={styles['stat-num']}>{orders.length}</span>
+
+          <span className={styles['stat-label']}>Zamówień</span>
         </div>
       </div>
 
-      <div className={profileStyles['orders-section']}>
-        <h2 className={profileStyles['section-title']}>Produkty</h2>
+      <div className={styles['orders-section']}>
+        <h2 className={styles['section-title']}>Produkty</h2>
+        <div
+          style={{
+            display: 'flex',
+            gap: '1rem',
+            marginBottom: '2rem',
+          }}
+        >
+          <input
+            placeholder="Nazwa"
+            value={newProduct.name}
+            onChange={(e) =>
+              setNewProduct({
+                ...newProduct,
+                name: e.target.value,
+              })
+            }
+          />
 
-        <div className={styles['add-product-form']}>
-          <label className={authStyles['field']}>
-            <span className={authStyles['field-label']}>Nazwa</span>
-            <div className={authStyles['field-input-wrap']}>
-              <input
-                type="text"
-                placeholder="np. Margherita"
-                value={newProduct.name}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, name: e.target.value })
-                }
-                className={authStyles['field-input']}
-              />
-            </div>
-          </label>
+          <input
+            placeholder="Cena"
+            type="number"
+            value={newProduct.price}
+            onChange={(e) =>
+              setNewProduct({
+                ...newProduct,
+                price: e.target.value,
+              })
+            }
+          />
 
-          <label className={authStyles['field']}>
-            <span className={authStyles['field-label']}>Cena (zł)</span>
-            <div className={authStyles['field-input-wrap']}>
-              <input
-                type="number"
-                placeholder="0"
-                value={newProduct.price}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, price: e.target.value })
-                }
-                className={authStyles['field-input']}
-              />
-            </div>
-          </label>
+          <input
+            placeholder="Kategoria"
+            value={newProduct.category}
+            onChange={(e) =>
+              setNewProduct({
+                ...newProduct,
+                category: e.target.value,
+              })
+            }
+          />
 
-          <label className={authStyles['field']}>
-            <span className={authStyles['field-label']}>Kategoria</span>
-            <div className={authStyles['field-input-wrap']}>
-              <input
-                type="text"
-                placeholder="np. Pizza"
-                value={newProduct.category}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, category: e.target.value })
-                }
-                className={authStyles['field-input']}
-              />
-            </div>
-          </label>
-
-          <button className={styles['add-button']} onClick={createProduct}>
-            <FontAwesomeIcon icon={faPlus} />
-            Dodaj produkt
-          </button>
+          <button onClick={createProduct}>Dodaj</button>
         </div>
 
-        <ul className={profileStyles['order-list']}>
+        <ul className={styles['order-list']}>
           {products.map((product) => (
-            <li key={product.id} className={profileStyles['order-row']}>
-              <div className={profileStyles['order-main']}>
-                <div className={profileStyles['order-id']}>{product.name}</div>
-                <div className={profileStyles['order-date']}>
-                  {product.category}
-                </div>
+            <li key={product.id} className={styles['order-row']}>
+              <div>
+                <strong>{product.name}</strong>
               </div>
-              <div className={profileStyles['order-total']}>
-                {product.price} zł
+
+              <div>
+                {product.price}
+                zł
               </div>
-              <div className={styles['product-actions']}>
-                <button
-                  className={styles['action-button-edit']}
-                  onClick={() => editProduct(product)}
-                >
-                  <FontAwesomeIcon icon={faPen} />
-                  Edytuj
-                </button>
-                <button
-                  className={styles['action-button-delete']}
-                  onClick={() => deleteProduct(product.id)}
-                >
-                  <FontAwesomeIcon icon={faTrash} />
-                  Usuń
-                </button>
+
+              <div>{product.category}</div>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  marginTop: '1rem',
+                }}
+              >
+                <button onClick={() => editProduct(product)}>Edytuj</button>
+                <button onClick={() => deleteProduct(product.id)}>Usuń</button>
               </div>
             </li>
           ))}
         </ul>
 
         <h2
-          className={profileStyles['section-title']}
-          style={{ marginTop: '2rem' }}
+          className={styles['section-title']}
+          style={{
+            marginTop: '2rem',
+          }}
         >
           Zamówienia
         </h2>
 
-        <ul className={profileStyles['order-list']}>
+        <ul className={styles['order-list']}>
           {orders.map((order) => (
-            <li key={order.id} className={profileStyles['order-row']}>
-              <div className={profileStyles['order-main']}>
-                <div className={profileStyles['order-id']}>
-                  {order.order_number}
-                </div>
-                <div className={profileStyles['order-date']}>
-                  {order.full_name}
-                </div>
+            <li key={order.id} className={styles['order-row']}>
+              <div>
+                <strong>{order.order_number}</strong>
               </div>
-              <div className={styles['status-select-wrap']}>
+
+              <div>{order.full_name}</div>
+
+              <div>
                 <select
                   value={order.status}
                   onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                  className={styles['status-select']}
                 >
-                  <option value="accepted">Przyjęte</option>
-                  <option value="preparing">Przygotowywane</option>
-                  <option value="on_the_way">W drodze</option>
-                  <option value="delivered">Dostarczone</option>
+                  <option value="accepted">accepted</option>
+
+                  <option value="preparing">preparing</option>
+
+                  <option value="on_the_way">on_the_way</option>
+
+                  <option value="delivered">delivered</option>
                 </select>
               </div>
             </li>

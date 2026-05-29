@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import AboutIllustration from '../../components/AboutIllustration';
+import AboutIllustration from '../../components/AboutIllustration/AboutIllustration';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUtensils,
