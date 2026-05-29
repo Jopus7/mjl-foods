@@ -1,0 +1,103 @@
+.add-product-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 20px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+}
+
+@media (max-width: 860px) {
+  .add-product-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  width: fit-content;
+  margin: 0 auto;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+.add-button:hover {
+  background: var(--green-deep);
+  transform: translateY(-1px);
+}
+
+.product-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button-edit,
+.action-button-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+.action-button-edit {
+  background: var(--cream-soft);
+  color: var(--ink);
+}
+.action-button-edit:hover {
+  background: var(--orange-soft);
+  color: var(--orange-deep);
+}
+.action-button-delete {
+  background: #fdecec;
+  color: #b23a3a;
+}
+.action-button-delete:hover {
+  background: #f5c6c6;
+  transform: translateY(-1px);
+}
+
+.status-select-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.status-select {
+  padding: 7px 12px;
+  background: var(--cream);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.status-select:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 4px var(--orange-soft);
+}

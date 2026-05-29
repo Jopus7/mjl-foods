@@ -4,7 +4,6 @@
   padding: 48px 28px 96px;
 }
 
-/* ========== HEADER ========== */
 .profile-header {
   display: flex;
   align-items: center;
@@ -22,7 +21,11 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--orange) 0%, var(--orange-deep) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--orange) 0%,
+    var(--orange-deep) 100%
+  );
   color: white;
   display: flex;
   align-items: center;
@@ -73,14 +76,15 @@
   font-weight: 500;
   font-size: 0.88rem;
   cursor: pointer;
-  transition: background 180ms ease, color 180ms ease;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
 }
 .logout-button:hover {
   background: var(--ink);
   color: var(--cream);
 }
 
-/* ========== STATS ========== */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -108,8 +112,12 @@
   font-variant-numeric: tabular-nums;
 }
 
-.stat-card:nth-child(2) .stat-num { color: var(--green-deep); }
-.stat-card:nth-child(3) .stat-num { color: var(--ink); }
+.stat-card:nth-child(2) .stat-num {
+  color: var(--green-deep);
+}
+.stat-card:nth-child(3) .stat-num {
+  color: var(--ink);
+}
 
 .stat-label {
   font-size: 0.78rem;
@@ -119,7 +127,6 @@
   color: var(--ink-mute);
 }
 
-/* ========== ORDER LIST ========== */
 .orders-section {
   margin-top: 8px;
 }
@@ -159,7 +166,10 @@
   border-radius: var(--radius-md);
   text-decoration: none;
   color: inherit;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
 }
 .order-row:hover {
   transform: translateY(-2px);
@@ -211,8 +221,8 @@
   color: var(--orange-deep);
 }
 .status-cancelled {
-  background: #F2E0E0;
-  color: #9B3A3A;
+  background: #f2e0e0;
+  color: #9b3a3a;
 }
 
 .order-total {
@@ -229,7 +239,6 @@
   font-size: 0.85rem;
 }
 
-/* ========== ORDER DETAILS ========== */
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -417,7 +426,6 @@
   color: var(--orange);
 }
 
-/* ========== EMPTY STATE ========== */
 .empty-state {
   text-align: center;
   padding: 80px 24px;
@@ -440,7 +448,6 @@
   margin: 0;
 }
 
-/* ========== MOBILE ========== */
 @media (max-width: 720px) {
   .profile-header {
     flex-direction: column;

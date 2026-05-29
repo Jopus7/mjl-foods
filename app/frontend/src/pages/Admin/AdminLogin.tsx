@@ -1,134 +1,68 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUser,
+  faLock,
+  faArrowRight,
+} from '@fortawesome/free-solid-svg-icons';
+import { useAdminLogin } from '../../hooks/useAdminLogin';
+import styles from '../Auth/Auth.module.css';
 
 const AdminLogin = () => {
-  const navigate =
-    useNavigate();
-
-  const [email, setEmail] =
-    useState('');
-
-  const [password,
-    setPassword] =
-    useState('');
-
-  const [error,
-    setError] =
-    useState('');
-
-  const handleLogin =
-    async () => {
-      try {
-        const formData =
-          new URLSearchParams();
-
-        formData.append(
-          'username',
-          email
-        );
-
-        formData.append(
-          'password',
-          password
-        );
-
-        const response =
-          await fetch(
-            'http://127.0.0.1:8000/api/auth/login',
-            {
-              method:
-                'POST',
-
-              headers: {
-                'Content-Type':
-                  'application/x-www-form-urlencoded',
-              },
-
-              body:
-                formData.toString(),
-            }
-          );
-
-        if (
-          !response.ok
-        ) {
-          throw new Error();
-        }
-
-        const data =
-          await response.json();
-
-        localStorage.setItem(
-          'token',
-          data.access_token
-        );
-
-        localStorage.setItem(
-          'isAdmin',
-          'true'
-        );
-
-        navigate(
-          '/admin/dashboard'
-        );
-      } catch {
-        setError(
-          'Niepoprawne dane logowania'
-        );
-      }
-    };
+  const { email, setEmail, password, setPassword, error, handleLogin } =
+    useAdminLogin();
 
   return (
-    <div
-      style={{
-        padding: '2rem',
-      }}
-    >
-      <h1>
-        Admin Login
-      </h1>
+    <div className={styles['auth-container']}>
+      <div className={styles['auth-card']}>
+        <header className={styles['auth-header']}>
+          <span className={styles['auth-eyebrow']}>Panel administratora</span>
+          <h1 className={styles['auth-title']}>
+            Admin <em>Login</em>
+          </h1>
+          <p className={styles['auth-lede']}>
+            Zaloguj się, aby zarządzać restauracją.
+          </p>
+        </header>
 
-    <input
-    type="text"
-    placeholder="admin"
-    value={email}
-    onChange={(e) =>
-        setEmail(
-        e.target.value
-        )
-    }
-    />
+        <div className={styles['auth-form']}>
+          <label className={styles['field']}>
+            <span className={styles['field-label']}>Login</span>
+            <div className={styles['field-input-wrap']}>
+              <FontAwesomeIcon icon={faUser} className={styles['field-icon']} />
+              <input
+                type="text"
+                placeholder="admin"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={styles['field-input']}
+                autoComplete="username"
+              />
+            </div>
+          </label>
 
-      <br />
-      <br />
+          <label className={styles['field']}>
+            <span className={styles['field-label']}>Hasło</span>
+            <div className={styles['field-input-wrap']}>
+              <FontAwesomeIcon icon={faLock} className={styles['field-icon']} />
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={styles['field-input']}
+                autoComplete="current-password"
+              />
+            </div>
+          </label>
 
-      <input
-        type="password"
-        placeholder="Hasło"
-        value={password}
-        onChange={(e) =>
-          setPassword(
-            e.target.value
-          )
-        }
-      />
+          {error && <div className={styles['auth-error']}>{error}</div>}
 
-      <br />
-      <br />
-
-      <button
-        onClick={
-          handleLogin
-        }
-      >
-        Zaloguj
-      </button>
-
-      {error && (
-        <p>
-          {error}
-        </p>
-      )}
+          <button className={styles['auth-submit']} onClick={handleLogin}>
+            Zaloguj się
+            <FontAwesomeIcon icon={faArrowRight} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
