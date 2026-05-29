@@ -92,10 +92,10 @@ def create_checkout_session(
                 mode="payment",
 
                 success_url=
-                "http://localhost:5179/status",
+                "http://localhost:5173/status",
 
                 cancel_url=
-                "http://localhost:5179/failed"
+                "http://localhost:5173/failed"
             )
         )
 

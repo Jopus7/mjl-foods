@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Category } from '../types';
+import { API_BASE_URL } from '../../../../config';
 
 const CATEGORY_MAPPING: Record<string, string> = {
   zupy: 'Zupy',
@@ -17,7 +18,7 @@ export const useMenuData = () => {
     const fetchMenu = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get('http://127.0.0.1:8000/api/menu');
+        const response = await axios.get(`${API_BASE_URL}/menu`);
         const backendData = response.data;
 
         const formattedMenu: Category[] = Object.keys(backendData).map(

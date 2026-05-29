@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Product } from '../types';
+import { API_BASE_URL } from '../../../../config';
 
 export const useHomeData = () => {
   const [popularProducts, setPopularProducts] = useState<Product[]>([]);
@@ -10,7 +11,7 @@ export const useHomeData = () => {
     const fetchPopular = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get('http://127.0.0.1:8000/api/popular');
+        const response = await axios.get(`${API_BASE_URL}/popular`);
         const data = response.data;
 
         if (Array.isArray(data)) {

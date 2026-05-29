@@ -4,6 +4,7 @@ export interface Product {
   description: string;
   price: number;
   imageUrl: string;
+  isPopular: boolean;
 }
 
 export interface Category {
@@ -12,6 +13,6 @@ export interface Category {
 }
 
 export interface OrderResponse {
-  status: "success" | "failed";
+  status: 'success' | 'failed';
   estimatedDeliveryTime: string;
 }
