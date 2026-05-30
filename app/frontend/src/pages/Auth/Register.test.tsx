@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Register from './Register';
 import { useAuth } from '../../context/AuthContext';
 
@@ -24,6 +24,7 @@ beforeEach(() => {
     register: mockRegister,
     logout: jest.fn(),
   });
+  global.fetch = jest.fn();
 });
 
 const fillForm = (overrides: Partial<Record<string, string>> = {}) => {
@@ -107,25 +108,58 @@ describe('Register', () => {
   });
 
   it('wywołuje register z poprawnymi danymi', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ message: 'Rejestracja pomyślna' }),
+    });
     mockRegister.mockResolvedValueOnce(undefined);
+
     render(<Register />);
     fillForm();
     submitForm();
-    await screen.findByRole('button', { name: /Załóż konto/i });
-    expect(mockRegister).toHaveBeenCalledWith(
-      'Jan',
-      'Nowak',
-      'jan@test.com',
-      'haslo123'
-    );
+
+    await waitFor(() => {
+      expect(mockRegister).toHaveBeenCalledWith(
+        'Jan',
+        'Nowak',
+        'jan@test.com',
+        'haslo123'
+      );
+    });
   });
 
   it('nawiguje do /profile po udanej rejestracji', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ message: 'Rejestracja pomyślna' }),
+    });
     mockRegister.mockResolvedValueOnce(undefined);
+
     render(<Register />);
     fillForm();
     submitForm();
-    await screen.findByRole('button', { name: /Załóż konto/i });
-    expect(mockNavigate).toHaveBeenCalledWith('/profile');
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/profile');
+    });
+  });
+
+  it('wyświetla błąd gdy backend zwraca błąd rejestracji', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({
+        detail: 'Użytkownik o podanym adresie e-mail już istnieje.',
+      }),
+    });
+
+    render(<Register />);
+    fillForm();
+    submitForm();
+
+    expect(
+      await screen.findByText(
+        'Użytkownik o podanym adresie e-mail już istnieje.'
+      )
+    ).toBeInTheDocument();
   });
 });

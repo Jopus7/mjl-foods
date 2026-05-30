@@ -1,9 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Profile from './Profile';
 import { useAuth } from '../../context/AuthContext';
 import { useOrders } from '../../hooks/useOrders';
 
 const mockNavigate = jest.fn();
+const mockLogout = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
@@ -17,7 +18,6 @@ jest.mock('../../hooks/useOrders');
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockUseOrders = useOrders as jest.MockedFunction<typeof useOrders>;
-const mockLogout = jest.fn();
 
 const mockUser = { firstName: 'Jan', lastName: 'Nowak', email: 'jan@test.com' };
 
@@ -53,88 +53,112 @@ beforeEach(() => {
   mockLogout.mockClear();
   mockUseOrders.mockReturnValue({ orders: mockOrders });
   mockUseAuth.mockReturnValue({
-    user: mockUser,
+    user: null,
     login: jest.fn(),
     register: jest.fn(),
     logout: mockLogout,
   });
+
+  localStorage.clear();
+  global.fetch = jest.fn();
 });
 
 describe('Profile — zalogowany użytkownik', () => {
-  it('wyświetla imię i nazwisko', () => {
-    render(<Profile />);
-    expect(screen.getByText('Jan Nowak')).toBeInTheDocument();
+  beforeEach(() => {
+    localStorage.setItem('token', 'valid-token');
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => mockUser,
+    });
   });
 
-  it('wyświetla email', () => {
+  it('wyświetla imię i nazwisko', async () => {
     render(<Profile />);
-    expect(screen.getByText(/jan@test.com/)).toBeInTheDocument();
+    expect(screen.getByText('Ładowanie...')).toBeInTheDocument();
+    expect(await screen.findByText('Jan Nowak')).toBeInTheDocument();
   });
 
-  it('wyświetla inicjały w awatarze', () => {
+  it('wyświetla email', async () => {
     render(<Profile />);
-    expect(screen.getByText('JN')).toBeInTheDocument();
+    expect(await screen.findByText(/jan@test.com/)).toBeInTheDocument();
   });
 
-  it('wyświetla liczbę wszystkich zamówień', () => {
+  it('wyświetla inicjały w awatarze', async () => {
     render(<Profile />);
-    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(await screen.findByText('JN')).toBeInTheDocument();
+  });
+
+  it('wyświetla liczbę wszystkich zamówień', async () => {
+    render(<Profile />);
+    expect(await screen.findByText('3')).toBeInTheDocument();
     expect(screen.getByText('Wszystkich zamówień')).toBeInTheDocument();
   });
 
-  it('wyświetla liczbę dostarczonych zamówień', () => {
+  it('wyświetla liczbę dostarczonych zamówień', async () => {
     render(<Profile />);
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(await screen.findByText('1')).toBeInTheDocument();
     expect(screen.getByText('Dostarczonych')).toBeInTheDocument();
   });
 
-  it('wyświetla łączną kwotę wydatków', () => {
+  it('wyświetla łączną kwotę wydatków', async () => {
     render(<Profile />);
-    expect(screen.getByText('159 zł')).toBeInTheDocument();
+    expect(await screen.findByText('159 zł')).toBeInTheDocument();
   });
 
-  it('wyświetla historię zamówień', () => {
+  it('wyświetla historię zamówień', async () => {
     render(<Profile />);
-    expect(screen.getByText('ORD-001')).toBeInTheDocument();
+    expect(await screen.findByText('ORD-001')).toBeInTheDocument();
     expect(screen.getByText('ORD-002')).toBeInTheDocument();
   });
 
-  it('wyświetla statusy zamówień', () => {
+  it('wyświetla statusy zamówień', async () => {
     render(<Profile />);
-    expect(screen.getByText('Dostarczone')).toBeInTheDocument();
+    expect(await screen.findByText('Dostarczone')).toBeInTheDocument();
     expect(screen.getByText('W realizacji')).toBeInTheDocument();
     expect(screen.getByText('Anulowane')).toBeInTheDocument();
   });
 
-  it('wyświetla przycisk Wyloguj', () => {
+  it('wyświetla przycisk Wyloguj', async () => {
     render(<Profile />);
     expect(
-      screen.getByRole('button', { name: /Wyloguj/i })
+      await screen.findByRole('button', { name: /Wyloguj/i })
     ).toBeInTheDocument();
   });
 
-  it('wywołuje logout po kliknięciu Wyloguj', () => {
+  it('wywołuje logout i czyści localStorage po kliknięciu Wyloguj', async () => {
     render(<Profile />);
-    fireEvent.click(screen.getByRole('button', { name: /Wyloguj/i }));
+    const logoutBtn = await screen.findByRole('button', { name: /Wyloguj/i });
+    fireEvent.click(logoutBtn);
     expect(mockLogout).toHaveBeenCalled();
+    expect(localStorage.getItem('token')).toBeNull();
   });
 
-  it('nawiguje do / po wylogowaniu', () => {
+  it('nawiguje do / po wylogowaniu', async () => {
     render(<Profile />);
-    fireEvent.click(screen.getByRole('button', { name: /Wyloguj/i }));
+    const logoutBtn = await screen.findByRole('button', { name: /Wyloguj/i });
+    fireEvent.click(logoutBtn);
     expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 });
 
-describe('Profile — niezalogowany użytkownik', () => {
-  it('nawiguje do /login gdy brak użytkownika', () => {
-    mockUseAuth.mockReturnValue({
-      user: null,
-      login: jest.fn(),
-      register: jest.fn(),
-      logout: jest.fn(),
-    });
+describe('Profile — niezalogowany lub błąd autoryzacji', () => {
+  it('nawiguje do /login gdy brak tokenu w localStorage', async () => {
     render(<Profile />);
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/login');
+    });
+  });
+
+  it('czyści dane, wywołuje logout i nawiguje do /login przy błędzie odpowiedzi API', async () => {
+    localStorage.setItem('token', 'invalid-token');
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false });
+
+    render(<Profile />);
+
+    await waitFor(() => {
+      expect(localStorage.getItem('token')).toBeNull();
+      expect(mockLogout).toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith('/login');
+    });
   });
 });

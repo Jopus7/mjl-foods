@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Login from './Login';
 import { useAuth } from '../../context/AuthContext';
 
@@ -24,6 +24,11 @@ beforeEach(() => {
     register: jest.fn(),
     logout: jest.fn(),
   });
+
+  localStorage.clear();
+  jest.spyOn(Storage.prototype, 'setItem');
+
+  global.fetch = jest.fn();
 });
 
 describe('Login', () => {
@@ -81,8 +86,13 @@ describe('Login', () => {
     ).toBeInTheDocument();
   });
 
-  it('wywołuje login z poprawnymi danymi', async () => {
+  it('wywołuje login z poprawnymi danymi oraz zapisuje token', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: 'fake-token' }),
+    });
     mockLogin.mockResolvedValueOnce(undefined);
+
     render(<Login />);
     fireEvent.change(screen.getByPlaceholderText('twoj@email.pl'), {
       target: { value: 'test@test.com' },
@@ -93,12 +103,23 @@ describe('Login', () => {
     fireEvent.submit(
       screen.getByRole('button', { name: /Zaloguj się/i }).closest('form')!
     );
-    await screen.findByRole('button', { name: /Zaloguj się/i });
-    expect(mockLogin).toHaveBeenCalledWith('test@test.com', 'haslo123');
+
+    await waitFor(() => {
+      expect(Storage.prototype.setItem).toHaveBeenCalledWith(
+        'token',
+        'fake-token'
+      );
+      expect(mockLogin).toHaveBeenCalledWith('test@test.com', 'haslo123');
+    });
   });
 
   it('nawiguje do /profile po udanym logowaniu', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: 'fake-token' }),
+    });
     mockLogin.mockResolvedValueOnce(undefined);
+
     render(<Login />);
     fireEvent.change(screen.getByPlaceholderText('twoj@email.pl'), {
       target: { value: 'test@test.com' },
@@ -109,12 +130,18 @@ describe('Login', () => {
     fireEvent.submit(
       screen.getByRole('button', { name: /Zaloguj się/i }).closest('form')!
     );
-    await screen.findByRole('button', { name: /Zaloguj się/i });
-    expect(mockNavigate).toHaveBeenCalledWith('/profile');
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/profile');
+    });
   });
 
-  it('wyświetla błąd gdy login rzuca wyjątek', async () => {
-    mockLogin.mockRejectedValueOnce(new Error('Unauthorized'));
+  it('wyświetla błąd gdy backend zwraca błąd', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ detail: 'Nieprawidłowy email lub hasło' }),
+    });
+
     render(<Login />);
     fireEvent.change(screen.getByPlaceholderText('twoj@email.pl'), {
       target: { value: 'test@test.com' },
@@ -125,6 +152,7 @@ describe('Login', () => {
     fireEvent.submit(
       screen.getByRole('button', { name: /Zaloguj się/i }).closest('form')!
     );
+
     expect(
       await screen.findByText('Nieprawidłowy email lub hasło')
     ).toBeInTheDocument();
