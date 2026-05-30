@@ -2,107 +2,121 @@ import { renderHook, act } from '@testing-library/react';
 import { useOrderStatus } from './useOrderStatus';
 
 const mockNavigate = jest.fn();
-let mockLocation = { state: null as any, search: '' };
+let mockParams = { id: undefined as string | undefined };
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
-  useLocation: () => mockLocation,
+  useParams: () => mockParams,
 }));
 
 beforeEach(() => {
   mockNavigate.mockClear();
-  mockLocation = { state: null, search: '' };
-  sessionStorage.clear();
+  mockParams = { id: undefined };
+  global.fetch = jest.fn();
   jest.useRealTimers();
 });
 
 describe('useOrderStatus', () => {
-  it('isSuccess jest false gdy brak deliveryTime', () => {
-    const { result } = renderHook(() => useOrderStatus());
-    expect(result.current.isSuccess).toBe(false);
+  it('nawiguje do /failed gdy brak id w url', async () => {
+    mockParams = { id: undefined };
+    await act(async () => {
+      renderHook(() => useOrderStatus());
+    });
+    expect(mockNavigate).toHaveBeenCalledWith('/failed', { replace: true });
   });
 
-  it('isSuccess jest true gdy deliveryTime jest w state', () => {
-    mockLocation = {
-      state: { deliveryTime: '2099-01-01T12:00:00.000Z' },
-      search: '',
-    };
-    const { result } = renderHook(() => useOrderStatus());
-    expect(result.current.isSuccess).toBe(true);
-  });
+  it('pobiera status zamówienia i wysyła e-mail przy poprawnym id', async () => {
+    mockParams = { id: 'ORD-123' };
+    const mockOrderData = { estimatedDeliveryTime: '2099-01-01T12:00:00.000Z' };
 
-  it('isSuccess jest true gdy deliveryTime jest w query params', () => {
-    mockLocation = {
-      state: null,
-      search: '?deliveryTime=2099-01-01T12:00:00.000Z',
-    };
-    const { result } = renderHook(() => useOrderStatus());
-    expect(result.current.isSuccess).toBe(true);
-  });
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockOrderData,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'email_sent' }),
+      });
 
-  it('isSuccess jest true gdy deliveryTime jest w sessionStorage', () => {
-    sessionStorage.setItem(
-      'deliveryTime',
-      JSON.stringify('2099-01-01T12:00:00.000Z')
+    let hookResult: any;
+    await act(async () => {
+      const { result } = renderHook(() => useOrderStatus());
+      hookResult = result;
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/orders/ORD-123')
     );
-    const { result } = renderHook(() => useOrderStatus());
-    expect(result.current.isSuccess).toBe(true);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/orders/send-success-email'),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ orderId: 'ORD-123' }),
+      })
+    );
   });
 
-  it('timeLeft jest pusty gdy brak deliveryTime', () => {
-    const { result } = renderHook(() => useOrderStatus());
-    expect(result.current.timeLeft).toBe('');
+  it('nawiguje do /failed gdy fetch rzuci błąd bazy', async () => {
+    mockParams = { id: 'ORD-123' };
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false });
+
+    await act(async () => {
+      renderHook(() => useOrderStatus());
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith('/failed', { replace: true });
   });
 
-  it('ustawia timeLeft dla przyszłego deliveryTime', () => {
+  it('ustawia licznik timeLeft po udanym pobraniu danych', async () => {
     jest.useFakeTimers();
-    mockLocation = {
-      state: { deliveryTime: '2099-01-01T12:00:00.000Z' },
-      search: '',
-    };
-    const { result } = renderHook(() => useOrderStatus());
+    mockParams = { id: 'ORD-123' };
+    const mockOrderData = { estimatedDeliveryTime: '2099-01-01T12:00:00.000Z' };
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockOrderData,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'email_sent' }),
+      });
+
+    let hookResult: any;
+    await act(async () => {
+      const { result } = renderHook(() => useOrderStatus());
+      hookResult = result;
+    });
+
     act(() => {
       jest.advanceTimersByTime(1000);
     });
-    expect(result.current.timeLeft).not.toBe('');
+
+    expect(hookResult.current.timeLeft).not.toBe('Ładowanie...');
     jest.useRealTimers();
   });
 
-  it('ustawia Dostarczono! gdy deliveryTime jest w przeszłości i brak orderId', () => {
-    mockLocation = {
-      state: { deliveryTime: '2000-01-01T12:00:00.000Z' },
-      search: '',
-    };
-    const { result } = renderHook(() => useOrderStatus());
-    expect(result.current.timeLeft).toBe('Dostarczono!');
-  });
+  it('nawiguje do profilu gdy deliveryTime jest w przeszłości', async () => {
+    mockParams = { id: 'ORD-123' };
+    const mockOrderData = { estimatedDeliveryTime: '2000-01-01T12:00:00.000Z' };
 
-  it('nawiguje do zamówienia gdy deliveryTime w przeszłości i jest orderId', () => {
-    mockLocation = {
-      state: { deliveryTime: '2000-01-01T12:00:00.000Z', orderId: 'ORD-123' },
-      search: '',
-    };
-    renderHook(() => useOrderStatus());
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockOrderData,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'email_sent' }),
+      });
+
+    await act(async () => {
+      renderHook(() => useOrderStatus());
+    });
+
     expect(mockNavigate).toHaveBeenCalledWith('/profile/orders/ORD-123', {
       replace: true,
     });
-  });
-
-  it('aktualizuje timeLeft po upływie sekundy', () => {
-    jest.useFakeTimers();
-    mockLocation = {
-      state: { deliveryTime: '2099-01-01T12:00:00.000Z' },
-      search: '',
-    };
-    const { result } = renderHook(() => useOrderStatus());
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
-    const after1s = result.current.timeLeft;
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
-    expect(result.current.timeLeft).not.toBe(after1s);
-    jest.useRealTimers();
   });
 });

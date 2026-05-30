@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../../../../config';
 
 interface LocationState {
@@ -18,12 +19,14 @@ interface CartItem {
 interface CheckoutErrors {
   name?: string;
   phone?: string;
+  email?: string;
   street?: string;
   building?: string;
   city?: string;
 }
 
 interface OrderResponseData {
+  orderId: string;
   estimatedDeliveryTime: string;
 }
 
@@ -35,6 +38,7 @@ export const useCheckout = () => {
     cart: CartItem[];
     clearCart: () => void;
   };
+  const { user } = useAuth();
 
   const promoCode = state?.promoCode || '';
 
@@ -43,11 +47,18 @@ export const useCheckout = () => {
   );
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [street, setStreet] = useState('');
   const [building, setBuilding] = useState('');
   const [apartment, setApartment] = useState('');
   const [city, setCity] = useState('');
   const [errors, setErrors] = useState<CheckoutErrors>({});
+
+  useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user]);
 
   const validate = (): boolean => {
     const newErrors: CheckoutErrors = {};
@@ -60,6 +71,13 @@ export const useCheckout = () => {
     const cleanedPhone = phone.replace(/\s+/g, '');
     if (!phoneRegex.test(cleanedPhone)) {
       newErrors.phone = 'Podaj poprawny 9-cyfrowy numer telefonu';
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) {
+      newErrors.email = 'Adres e-mail jest wymagany';
+    } else if (!emailRegex.test(email.trim())) {
+      newErrors.email = 'Podaj poprawny adres e-mail';
     }
 
     if (deliveryMethod === 'delivery') {
@@ -92,7 +110,7 @@ export const useCheckout = () => {
         customer: {
           firstName: name,
           phone,
-          email: 'micha.j@gmail.com',
+          email: email.trim(),
           address: fullAddress,
           city: deliveryMethod === 'delivery' ? city : 'Warszawa',
         },
@@ -123,6 +141,9 @@ export const useCheckout = () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              email: email.trim(),
+              orderId: result.orderId,
+              estimatedDeliveryTime: result.estimatedDeliveryTime,
               items: cart.map((item) => ({
                 productId: item.id || item.cartItemId,
                 quantity: 1,
@@ -158,6 +179,8 @@ export const useCheckout = () => {
     setName,
     phone,
     setPhone,
+    email,
+    setEmail,
     street,
     setStreet,
     building,
