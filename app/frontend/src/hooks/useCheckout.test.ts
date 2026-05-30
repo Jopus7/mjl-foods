@@ -1,8 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { useCheckout } from './useCheckout';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 jest.mock('../context/CartContext');
+jest.mock('../context/AuthContext');
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
   useLocation: () => mockLocation,
@@ -12,6 +14,7 @@ const mockNavigate = jest.fn();
 const mockLocation = { state: null };
 const mockClearCart = jest.fn();
 const mockUseCart = useCart as jest.MockedFunction<typeof useCart>;
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 const mockCart = [
   { id: 1, cartItemId: 1, name: 'Zupa', price: 12 },
@@ -26,6 +29,12 @@ beforeEach(() => {
     clearCart: mockClearCart,
     addToCart: jest.fn(),
     removeFromCart: jest.fn(),
+  });
+  mockUseAuth.mockReturnValue({
+    user: null,
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
   });
   global.fetch = jest.fn();
 });
@@ -55,6 +64,37 @@ describe('useCheckout — validate', () => {
     );
   });
 
+  it('zwraca błąd gdy email jest pusty', async () => {
+    const { result } = renderHook(() => useCheckout());
+    act(() => {
+      result.current.setName('Jan Nowak');
+    });
+    act(() => {
+      result.current.setPhone('123456789');
+    });
+    await act(async () => {
+      await result.current.sendOrder();
+    });
+    expect(result.current.errors.email).toBe('Adres e-mail jest wymagany');
+  });
+
+  it('zwraca błąd gdy email jest niepoprawny', async () => {
+    const { result } = renderHook(() => useCheckout());
+    act(() => {
+      result.current.setName('Jan Nowak');
+    });
+    act(() => {
+      result.current.setPhone('123456789');
+    });
+    act(() => {
+      result.current.setEmail('invalid-email');
+    });
+    await act(async () => {
+      await result.current.sendOrder();
+    });
+    expect(result.current.errors.email).toBe('Podaj poprawny adres e-mail');
+  });
+
   it('akceptuje poprawny 9-cyfrowy numer telefonu', async () => {
     const { result } = renderHook(() => useCheckout());
     act(() => {
@@ -62,6 +102,9 @@ describe('useCheckout — validate', () => {
     });
     act(() => {
       result.current.setPhone('123456789');
+    });
+    act(() => {
+      result.current.setEmail('jan@test.com');
     });
     act(() => {
       result.current.setStreet('Słoneczna');
@@ -87,6 +130,9 @@ describe('useCheckout — validate', () => {
       result.current.setPhone('123 456 789');
     });
     act(() => {
+      result.current.setEmail('jan@test.com');
+    });
+    act(() => {
       result.current.setStreet('Słoneczna');
     });
     act(() => {
@@ -109,6 +155,9 @@ describe('useCheckout — validate', () => {
     act(() => {
       result.current.setPhone('123456789');
     });
+    act(() => {
+      result.current.setEmail('jan@test.com');
+    });
     await act(async () => {
       await result.current.sendOrder();
     });
@@ -122,6 +171,9 @@ describe('useCheckout — validate', () => {
     });
     act(() => {
       result.current.setPhone('123456789');
+    });
+    act(() => {
+      result.current.setEmail('jan@test.com');
     });
     act(() => {
       result.current.setStreet('Słoneczna');
@@ -139,6 +191,9 @@ describe('useCheckout — validate', () => {
     });
     act(() => {
       result.current.setPhone('123456789');
+    });
+    act(() => {
+      result.current.setEmail('jan@test.com');
     });
     act(() => {
       result.current.setStreet('Słoneczna');
@@ -164,6 +219,9 @@ describe('useCheckout — validate', () => {
       result.current.setPhone('123456789');
     });
     act(() => {
+      result.current.setEmail('jan@test.com');
+    });
+    act(() => {
       result.current.setStreet('Słoneczna');
     });
     act(() => {
@@ -186,6 +244,9 @@ describe('useCheckout — validate', () => {
     act(() => {
       result.current.setPhone('123456789');
     });
+    act(() => {
+      result.current.setEmail('jan@test.com');
+    });
     await act(async () => {
       await result.current.sendOrder();
     });
@@ -202,6 +263,9 @@ describe('useCheckout — sendOrder', () => {
     });
     act(() => {
       result.current.setPhone('123456789');
+    });
+    act(() => {
+      result.current.setEmail('jan@test.com');
     });
     act(() => {
       result.current.setStreet('Słoneczna');
@@ -229,6 +293,7 @@ describe('useCheckout — sendOrder', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({
+          orderId: 'ORD-123',
           estimatedDeliveryTime: '2099-01-01T12:00:00.000Z',
         }),
       })

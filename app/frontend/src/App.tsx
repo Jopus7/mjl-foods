@@ -21,6 +21,7 @@ import './index.css';
 import ScrollToTop from './components/ScrollToTop/ScrollToTop';
 import Admin from './pages/Admin/Admin';
 import AdminLogin from './pages/Admin/AdminLogin';
+import OrderFailed from './pages/OrderFailed/OrderFailed';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -40,7 +41,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/status" element={<OrderStatus />} />
+          <Route path="/status/:id" element={<OrderStatus />} />
+          <Route path="/failed" element={<OrderFailed />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
@@ -59,15 +61,9 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin"
-            element={<AdminLogin />}
-          />
+          <Route path="/admin" element={<AdminLogin />} />
 
-          <Route
-            path="/admin/dashboard"
-            element={<Admin />}
-          />
+          <Route path="/admin/dashboard" element={<Admin />} />
 
           <Route
             path="*"

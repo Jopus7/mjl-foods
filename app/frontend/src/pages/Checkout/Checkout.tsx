@@ -9,6 +9,8 @@ const Checkout = () => {
     setName,
     phone,
     setPhone,
+    email,
+    setEmail,
     street,
     setStreet,
     building,
@@ -71,6 +73,19 @@ const Checkout = () => {
           />
           {errors.phone && (
             <span className={styles['error-text']}>{errors.phone}</span>
+          )}
+        </div>
+
+        <div className={`${styles['input-group']} ${styles['full-width']}`}>
+          <input
+            placeholder="Adres e-mail"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={errors.email ? styles['input-error'] : ''}
+          />
+          {errors.email && (
+            <span className={styles['error-text']}>{errors.email}</span>
           )}
         </div>
 

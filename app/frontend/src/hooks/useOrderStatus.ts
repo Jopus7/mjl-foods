@@ -1,92 +1,86 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../../../config';
 
-interface LocationState {
-  deliveryTime?: string;
-  orderId?: string;
-}
+const firedOrders = new Set<string>();
 
 export const useOrderStatus = () => {
-  const { state, search } = useLocation();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const locationState = state as LocationState | null;
 
-  const params = new URLSearchParams(search);
-  const deliveryTime =
-  locationState?.deliveryTime ??
-  params.get('deliveryTime') ??
-  JSON.parse(
-    sessionStorage.getItem(
-      'deliveryTime'
-    ) || 'null'
-  ) ??
-  null;
-  const orderId = locationState?.orderId ?? params.get('orderId') ?? null;
-
-  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [deliveryTime, setDeliveryTime] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<string>('Ładowanie...');
 
   useEffect(() => {
-    console.log('DELIVERY TIME:', deliveryTime)
+    const fetchOrderStatus = async () => {
+      if (!id) {
+        navigate('/failed', { replace: true });
+        return;
+      }
+      try {
+        const response = await fetch(`${API_BASE_URL}/orders/${id}`);
+        if (!response.ok) {
+          throw new Error('Nie udało się pobrać statusu zamówienia');
+        }
+        const data = await response.json();
+        setDeliveryTime(data.estimatedDeliveryTime);
+
+        if (!firedOrders.has(id)) {
+          firedOrders.add(id);
+          await fetch(`${API_BASE_URL}/orders/send-success-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId: id }),
+          });
+        }
+      } catch (error) {
+        navigate('/failed', { replace: true });
+      }
+    };
+    fetchOrderStatus();
+  }, [id, navigate]);
+
+  useEffect(() => {
     if (!deliveryTime) return;
 
-    const formattedTime =
-      deliveryTime.replace(
-        /(\.\d{3})\d+/,
-        '$1'
-      );
-    console.log(
-    'FORMATTED:',
-    formattedTime
-  );
-
-  console.log(
-    'DATE:',
-    new Date(formattedTime)
-  );
-
-  console.log(
-    'TIMESTAMP:',
-    new Date(
-      formattedTime
-    ).getTime()
-  );
-
-
+    const formattedTime = deliveryTime.replace(/(\.\d{3})\d+/, '$1');
     const delivery = new Date(formattedTime).getTime();
-    const now = new Date().getTime();
 
-    if (delivery - now <= 0) {
-      if (orderId) {
-        navigate(`/profile/orders/${orderId}`, { replace: true });
-      } else {
-        setTimeLeft('Dostarczono!');
-      }
-      return;
-    }
-
-    const timer = setInterval(() => {
-      const diff = new Date(formattedTime).getTime() - new Date().getTime();
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const diff = delivery - now;
 
       if (diff <= 0) {
-        clearInterval(timer);
-        if (orderId) {
-          navigate(`/profile/orders/${orderId}`, { replace: true });
+        if (id) {
+          navigate(`/profile/orders/${id}`, { replace: true });
         } else {
           setTimeLeft('Dostarczono!');
         }
-        return;
+        return false;
       }
 
       const minutes = Math.floor(diff / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
       setTimeLeft(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+      return true;
+    };
+
+    const hasTimeLeft = calculateTimeLeft();
+    if (!hasTimeLeft) return;
+
+    const timer = setInterval(() => {
+      const active = calculateTimeLeft();
+      if (!active) {
+        clearInterval(timer);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [deliveryTime, orderId, navigate]);
+  }, [deliveryTime, id, navigate]);
 
   return {
-    isSuccess: !!deliveryTime,
     timeLeft,
   };
 };

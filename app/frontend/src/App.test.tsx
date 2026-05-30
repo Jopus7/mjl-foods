@@ -39,6 +39,10 @@ jest.mock('./pages/OrderStatus/OrderStatus', () => ({
   __esModule: true,
   default: () => <div>OrderStatus Page</div>,
 }));
+jest.mock('./pages/OrderFailed/OrderFailed', () => ({
+  __esModule: true,
+  default: () => <div>OrderFailed Page</div>,
+}));
 jest.mock('./pages/Auth/Login', () => ({
   __esModule: true,
   default: () => <div>Login Page</div>,
@@ -124,9 +128,14 @@ describe('App — routing publiczny', () => {
     expect(screen.getByText('Checkout Page')).toBeInTheDocument();
   });
 
-  it('renderuje OrderStatus na /status', () => {
-    renderWithPath('/status');
+  it('renderuje OrderStatus na /status/:id', () => {
+    renderWithPath('/status/ORD-123456');
     expect(screen.getByText('OrderStatus Page')).toBeInTheDocument();
+  });
+
+  it('renderuje OrderFailed na /failed', () => {
+    renderWithPath('/failed');
+    expect(screen.getByText('OrderFailed Page')).toBeInTheDocument();
   });
 
   it('renderuje Login na /login', () => {
