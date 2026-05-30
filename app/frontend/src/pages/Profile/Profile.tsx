@@ -1,41 +1,97 @@
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faChevronRight, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEnvelope,
+  faChevronRight,
+  faRightFromBracket,
+} from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/AuthContext';
 import { useOrders, Order } from '../../hooks/useOrders';
 import styles from './Profile.module.css';
 
 const statusLabel = (status: Order['status']) => {
   switch (status) {
-    case 'delivered':   return 'Dostarczone';
-    case 'in_progress': return 'W realizacji';
-    case 'cancelled':   return 'Anulowane';
+    case 'delivered':
+      return 'Dostarczone';
+    case 'in_progress':
+      return 'W realizacji';
+    case 'cancelled':
+      return 'Anulowane';
   }
 };
 
 const statusClass = (status: Order['status']) => {
   switch (status) {
-    case 'delivered':   return styles['status-delivered'];
-    case 'in_progress': return styles['status-progress'];
-    case 'cancelled':   return styles['status-cancelled'];
+    case 'delivered':
+      return styles['status-delivered'];
+    case 'in_progress':
+      return styles['status-progress'];
+    case 'cancelled':
+      return styles['status-cancelled'];
   }
 };
 
 const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' });
+  new Date(iso).toLocaleDateString('pl-PL', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { orders } = useOrders();
   const navigate = useNavigate();
+  const [realUser, setRealUser] = useState<{
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:8000/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error();
+        }
+        const data = await response.json();
+        setRealUser(data);
+      } catch {
+        localStorage.removeItem('token');
+        logout();
+        navigate('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [navigate, logout]);
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     logout();
     navigate('/');
   };
 
-  if (!user) {
-    navigate('/login');
+  if (loading) {
+    return <div className={styles['profile-container']}>Ładowanie...</div>;
+  }
+
+  if (!realUser) {
     return null;
   }
 
@@ -43,16 +99,17 @@ const Profile = () => {
     <div className={styles['profile-container']}>
       <div className={styles['profile-header']}>
         <div className={styles['avatar']}>
-          {user.firstName[0]}{user.lastName[0]}
+          {realUser.firstName[0]}
+          {realUser.lastName[0]}
         </div>
         <div className={styles['user-info']}>
           <h1 className={styles['user-name']}>
-            {user.firstName} {user.lastName}
+            {realUser.firstName} {realUser.lastName}
           </h1>
           <div className={styles['user-meta']}>
             <span className={styles['user-meta-item']}>
               <FontAwesomeIcon icon={faEnvelope} />
-              {user.email}
+              {realUser.email}
             </span>
           </div>
         </div>
@@ -88,15 +145,23 @@ const Profile = () => {
         <ul className={styles['order-list']}>
           {orders.map((order) => (
             <li key={order.id}>
-              <Link to={`/profile/orders/${order.id}`} className={styles['order-row']}>
+              <Link
+                to={`/profile/orders/${order.id}`}
+                className={styles['order-row']}
+              >
                 <div className={styles['order-main']}>
                   <div className={styles['order-id']}>{order.id}</div>
-                  <div className={styles['order-date']}>{formatDate(order.date)}</div>
+                  <div className={styles['order-date']}>
+                    {formatDate(order.date)}
+                  </div>
                 </div>
                 <div className={styles['order-items-count']}>
-                  {order.items.length} {order.items.length === 1 ? 'pozycja' : 'pozycji'}
+                  {order.items.length}{' '}
+                  {order.items.length === 1 ? 'pozycja' : 'pozycji'}
                 </div>
-                <div className={`${styles['order-status']} ${statusClass(order.status)}`}>
+                <div
+                  className={`${styles['order-status']} ${statusClass(order.status)}`}
+                >
                   {statusLabel(order.status)}
                 </div>
                 <div className={styles['order-total']}>{order.total} zł</div>

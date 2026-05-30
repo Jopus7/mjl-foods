@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faLock, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUser,
+  faEnvelope,
+  faLock,
+  faArrowRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Auth.module.css';
 
@@ -32,8 +37,31 @@ const Register = () => {
       return;
     }
 
-    await register(firstName, lastName, email, password);
-    navigate('/profile');
+    try {
+      const response = await fetch('http://localhost:8000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Wystąpił błąd podczas rejestracji.');
+      }
+
+      await register(firstName, lastName, email, password);
+      navigate('/profile');
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -45,7 +73,8 @@ const Register = () => {
             Załóż <em>konto</em>
           </h1>
           <p className={styles['auth-lede']}>
-            Zamawiaj szybciej, śledź historię i nigdy nie zapomnij ulubionych dań.
+            Zamawiaj szybciej, śledź historię i nigdy nie zapomnij ulubionych
+            dań.
           </p>
         </header>
 
@@ -54,7 +83,10 @@ const Register = () => {
             <label className={styles['field']}>
               <span className={styles['field-label']}>Imię</span>
               <div className={styles['field-input-wrap']}>
-                <FontAwesomeIcon icon={faUser} className={styles['field-icon']} />
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className={styles['field-icon']}
+                />
                 <input
                   type="text"
                   placeholder="Anna"
@@ -69,7 +101,10 @@ const Register = () => {
             <label className={styles['field']}>
               <span className={styles['field-label']}>Nazwisko</span>
               <div className={styles['field-input-wrap']}>
-                <FontAwesomeIcon icon={faUser} className={styles['field-icon']} />
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className={styles['field-icon']}
+                />
                 <input
                   type="text"
                   placeholder="Kowalska"
@@ -85,7 +120,10 @@ const Register = () => {
           <label className={styles['field']}>
             <span className={styles['field-label']}>Email</span>
             <div className={styles['field-input-wrap']}>
-              <FontAwesomeIcon icon={faEnvelope} className={styles['field-icon']} />
+              <FontAwesomeIcon
+                icon={faEnvelope}
+                className={styles['field-icon']}
+              />
               <input
                 type="email"
                 placeholder="twoj@email.pl"

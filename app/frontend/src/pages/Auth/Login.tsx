@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLock, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEnvelope,
+  faLock,
+  faArrowRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Auth.module.css';
 
@@ -12,36 +16,42 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-  const handleSubmit = async (
-  e: React.FormEvent
-) => {
-  console.log('submit works');
-  e.preventDefault();
-  setError('');
+    if (!email || !password) {
+      setError('Wypełnij wszystkie pola.');
+      return;
+    }
 
-  if (!email || !password) {
-    setError(
-      'Wypełnij wszystkie pola.'
-    );
-    return;
-  }
+    try {
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
 
-  try {
-    await login(
-      email,
-      password
-    );
+      const response = await fetch('http://localhost:8000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
 
-    navigate(
-      '/profile'
-    );
-  } catch {
-    setError(
-      'Nieprawidłowy email lub hasło'
-    );
-  }
-};
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Nieprawidłowy email lub hasło');
+      }
+
+      localStorage.setItem('token', data.access_token);
+
+      await login(email, password);
+      navigate('/profile');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
   return (
     <div className={styles['auth-container']}>
@@ -60,7 +70,10 @@ const Login = () => {
           <label className={styles['field']}>
             <span className={styles['field-label']}>Email</span>
             <div className={styles['field-input-wrap']}>
-              <FontAwesomeIcon icon={faEnvelope} className={styles['field-icon']} />
+              <FontAwesomeIcon
+                icon={faEnvelope}
+                className={styles['field-icon']}
+              />
               <input
                 type="email"
                 placeholder="twoj@email.pl"
